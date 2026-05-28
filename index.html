@@ -13,37 +13,23 @@ body.light{
   --accent:#2F63D4;--accent2:#6045B8;--danger:#CC2233;--warn:#A05800;--ok:#157850;
   --r:12px;--r-sm:8px;
 }
-
-/* Titlebar en thème clair */
 body.light .wbtn:hover{ background:var(--bg-hover);color:var(--text-1); }
 body.light .wbtn.cls:hover{ background:var(--danger);color:#fff; }
-
-/* Sidebar en thème clair */
 body.light .sb{ background:var(--bg-deep); }
 body.light .sb-label{ color:var(--text-3); }
 body.light .nav.on{ background:rgba(47,99,212,0.1);color:var(--text-1); }
 body.light .sb-timer-chip{ background:var(--bg-card);color:var(--text-1); }
-
-/* Modal */
 body.light .overlay{ background:rgba(100,110,150,0.5); }
-
-/* Tags de type */
 body.light .tag-sleep{ background:rgba(47,99,212,.1);color:#2F63D4; }
 body.light .tag-shutdown{ background:rgba(204,34,51,.1);color:#CC2233; }
 body.light .tag-restart{ background:rgba(160,88,0,.1);color:#A05800; }
 body.light .tag-hibernate{ background:rgba(96,69,184,.1);color:#6045B8; }
 body.light .tag-lock{ background:rgba(21,120,80,.1);color:#157850; }
 body.light .tag-logoff{ background:rgba(180,40,20,.1);color:#B42814; }
-
-/* Notif + exec overlay */
 body.light .notif{ background:#fff;border-color:var(--border-hi);box-shadow:0 4px 16px rgba(0,0,0,.12); }
 body.light .exec-ov{ background:rgba(238,240,250,.97); }
 body.light .exec-sub{ color:var(--text-2); }
-
-/* Scrollbar */
 body.light ::-webkit-scrollbar-thumb{ background:var(--bg-hover); }
-
-/* Toggle */
 body.light .toggle{ background:var(--bg-card2);border-color:var(--border); }
 .theme-toggle{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:transparent;border:none;cursor:pointer;transition:all .2s;-webkit-app-region:no-drag;}
 .theme-toggle:hover{background:var(--bg-hover);}
@@ -165,7 +151,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg-main);color:var(--text-
 .pw svg{width:22px;height:22px;stroke-width:1.8;}
 .pw-lbl{font-size:11px;font-weight:700;color:var(--text-2);}
 .pw:hover .pw-lbl{color:var(--text-1);}
-/* ── CUSTOM TIMER ── */
 .time-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:26px;}
 .big-time{display:flex;align-items:flex-start;justify-content:center;gap:4px;margin-bottom:22px;}
 .bu{display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -173,11 +158,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg-main);color:var(--text-
 .step-btn{background:none;border:none;color:var(--text-3);cursor:pointer;padding:3px 12px;transition:color .15s;line-height:1;display:flex;align-items:center;justify-content:center;}
 .step-btn svg{width:16px;height:16px;stroke-width:2.5;}
 .step-btn:hover{color:var(--accent);}
-/* Input dans timer libre : cliquable, sans spinner natif */
 .big-n{font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:700;color:var(--text-1);width:88px;text-align:center;line-height:1;background:var(--bg-main);border:1px solid var(--border);border-radius:10px;padding:6px 0;display:block;min-height:72px;outline:none;-moz-appearance:textfield;cursor:text;}
 .big-n::-webkit-inner-spin-button,.big-n::-webkit-outer-spin-button{display:none;}
 .big-n:focus{border-color:var(--border-hi);color:var(--text-1);}
-/* Séparateur aligné sur le chiffre : margin-top = hauteur step-btn (~22px) */
 .big-sep{font-size:44px;font-weight:300;color:rgba(110,132,176,0.35);line-height:1;margin-top:36px;}
 .preset-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;}
 .chip{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card2);color:var(--text-2);cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;}
@@ -212,7 +195,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg-main);color:var(--text-
 .set-input{background:var(--bg-main);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 10px;color:var(--text-1);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;outline:none;width:90px;text-align:center;transition:border-color .15s;}
 .set-input:focus{border-color:var(--border-hi);}
 .set-unit{font-size:11px;color:var(--text-2);margin-left:6px;font-weight:600;}
-/* Mini champs h/m/s dans paramètres */
 .hms-row{display:flex;align-items:center;gap:4px;}
 .hms-in{background:var(--bg-main);border:1px solid var(--border);border-radius:var(--r-sm);padding:5px 0;color:var(--text-1);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;outline:none;width:42px;text-align:center;transition:border-color .15s;-moz-appearance:textfield;}
 .hms-in::-webkit-inner-spin-button,.hms-in::-webkit-outer-spin-button{display:none;}
@@ -491,9 +473,7 @@ select.f-input option{background:var(--bg-card2);}
             <svg id="qbEditIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
         </div>
-        <!-- Aperçu des boutons -->
         <div id="qbPreview" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
-        <!-- Mode édition -->
         <div id="qbEditor" style="display:none;flex-direction:column;gap:8px;width:100%;">
           <div id="qbList" style="display:flex;flex-direction:column;gap:6px;"></div>
           <button class="btn" onclick="addQbBtn()" style="align-self:flex-start;">
@@ -515,6 +495,19 @@ select.f-input option{background:var(--bg-card2);}
       <div class="set-item">
         <div><div class="set-name">Supprimer le timer une fois terminé</div><div class="set-desc">Efface l'affichage du timer après exécution de l'action</div></div>
         <div class="toggle on" id="tgl-deleteFinish" onclick="togSet('deleteOnFinish','tgl-deleteFinish')"></div>
+      </div>
+      <div class="set-item">
+        <div><div class="set-name">Attendre la fin de la musique</div><div class="set-desc">Exécute l'action seulement quand la musique s'arrête (Spotify, navigateur…)</div></div>
+        <div class="toggle" id="tgl-waitMusic" onclick="togSet('waitForMusic','tgl-waitMusic')"></div>
+      </div>
+      <div class="set-item" id="waitMusicMaxRow" style="display:none;">
+        <div><div class="set-name">Délai maximum d'attente</div><div class="set-desc">Exécute quand même après ce délai (0 = attente illimitée)</div></div>
+        <div class="hms-row">
+          <input class="hms-in" id="in-waitMusicMaxH" type="number" min="0" max="23" value="0" oninput="saveWaitMusicMax()">
+          <span class="hms-sep">h</span>
+          <input class="hms-in" id="in-waitMusicMaxM" type="number" min="0" max="59" value="0" oninput="saveWaitMusicMax()">
+          <span class="hms-sep">min</span>
+        </div>
       </div>
     </div>
     <div class="set-card">
@@ -598,7 +591,6 @@ const ICONS = {
 const ICON_KEYS = Object.keys(ICONS);
 const COLORS = ['#5B8DEF','#9B7FE8','#EF5B6E','#3EC9A7','#F0A050','#5BC4EF','#A0EF5B','#EF5BB5','#F0D050'];
 
-// Couleurs chaudes par type d'action
 const TYPE_COLORS = {
   sleep:     '#FFB347',
   shutdown:  '#FF4757',
@@ -627,7 +619,7 @@ const NOTIF_ICONS = {
   trash:  { color:'#FF4757', path:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>' },
 };
 
-let actions = [], settings = { notifEnabled:true, notifTimes:[300], addTimeAmount:600, minimizeToTray:true, warnOnReplace:true, deleteOnFinish:true, quickTimeButtons:[300,600,900,1800,3600,-300,-600,-900] };
+let actions = [], settings = { notifEnabled:true, notifTimes:[300], addTimeAmount:600, minimizeToTray:true, warnOnReplace:true, deleteOnFinish:true, waitForMusic:false, waitForMusicMaxSecs:0, quickTimeButtons:[300,600,900,1800,3600,-300,-600,-900] };
 let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist')||'[]');
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
 
@@ -635,7 +627,6 @@ ipcRenderer.on('actions-data', (e,d) => { actions=d; renderActions(); renderMana
 ipcRenderer.on('settings-data', (e,d) => { settings={...settings,...d}; applySettings(); });
 
 ipcRenderer.on('timer-started', (e,d) => {
-  // Remplace l'éventuel timer existant (mode timer unique)
   Object.keys(activeTimers).forEach(id => delete activeTimers[id]);
   document.querySelectorAll('.tc[data-tid]').forEach(el => el.remove());
   activeTimers[d.id] = { id:d.id, remaining:d.seconds, total:d.seconds, name:d.actionName, icon:d.actionIcon||'clock', type:d.type, color:d.color||COLORS[0], paused:false };
@@ -666,7 +657,6 @@ ipcRenderer.on('action-executing', (e,{type,timerId}) => {
   el.innerHTML = ico; el.setAttribute('stroke', col);
   document.getElementById('execTitleText').textContent = names[type]||type;
   document.getElementById('execOv').classList.add('open');
-  // Stocker les données du timer pour relancer plus tard
   const timerData = timerId && activeTimers[timerId] ? {
     seconds: activeTimers[timerId].total,
     actionName: activeTimers[timerId].name,
@@ -674,7 +664,6 @@ ipcRenderer.on('action-executing', (e,{type,timerId}) => {
     type: activeTimers[timerId].type,
     color: activeTimers[timerId].color,
   } : null;
-  // Supprimer le timer de l'UI si deleteOnFinish activé
   if (settings.deleteOnFinish) {
     Object.keys(activeTimers).forEach(id => delete activeTimers[id]);
     document.querySelectorAll('.tc[data-tid]').forEach(el => el.remove());
@@ -692,12 +681,8 @@ ipcRenderer.on('shortcut-pause', (e, {id, paused}) => {
 ipcRenderer.on('action-done', () => { document.getElementById('execOv').classList.remove('open'); });
 window.addEventListener('focus', () => { document.getElementById('execOv').classList.remove('open'); });
 
-// ── THEME ──
-// Mapping couleurs sombres → claires pour les icônes hardcodées
 const WARM_DARK  = ['#FF4757','#FFD32A','#FFB347','#FF6B9D','#A8FF3E','#FF6348'];
 const WARM_LIGHT = ['#C0202A','#8A6000','#B05800','#B02868','#2E7A00','#A02818'];
-
-// Tous les SVGs d'action dans le contenu (pas la titlebar ni les boutons système)
 
 function applyIconColors(isLight) {
   document.querySelectorAll('svg[stroke]').forEach(svg => {
@@ -720,16 +705,13 @@ function updateThemeBtn(isLight) {
   const ico = document.getElementById('themeIcon');
   if (!ico) return;
   if (isLight) {
-    // En mode clair → afficher soleil orange (indique le thème actif)
     ico.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
     ico.style.stroke = '#D08020';
   } else {
-    // En mode sombre → afficher lune bleue
     ico.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
     ico.style.stroke = '#5B8DEF';
   }
 }
-// Appliquer le thème sauvegardé
 (function() {
   const saved = localStorage.getItem('stp_theme');
   if (saved === 'light') { document.body.classList.add('light'); updateThemeBtn(true); }
@@ -739,7 +721,6 @@ ipc('get-actions'); ipc('get-settings');
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
 loadSbOrder(); initSbDrag(); showPage('p-actions');
 
-// ── NAVIGATION ──
 function navClick(el) {
   if (document.getElementById('sidebar').classList.contains('edit-mode')) return;
   showPage(el.dataset.page);
@@ -752,7 +733,6 @@ function showPage(id) {
   if (nav) nav.classList.add('on');
 }
 
-// ── SIDEBAR EDIT / DRAG ──
 let sbEditing = false;
 const ICON_PENCIL = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
 const ICON_SAVE   = '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>';
@@ -769,7 +749,6 @@ function toggleSbEdit() {
   if (!sbEditing) saveSbOrder();
 }
 function saveSbOrder() {
-  // On sauvegarde uniquement l'ordre des items non-locked (avant le séparateur)
   const ids = [...document.querySelectorAll('#sbNavList .nav:not([data-locked])')].map(n=>n.id);
   localStorage.setItem('stp_sb_order', JSON.stringify(ids));
 }
@@ -779,12 +758,10 @@ function loadSbOrder() {
     if (!order || !order.length) return;
     const list = document.getElementById('sbNavList');
     const sep  = document.getElementById('sb-sep-static');
-    // Réinsérer les items non-locked dans l'ordre sauvegardé, avant le séparateur
     order.forEach(id => {
       const el = document.getElementById(id);
       if (el && !el.dataset.locked) list.insertBefore(el, sep);
     });
-    // Le séparateur, history et settings restent toujours à la fin — on les force
     const history  = document.getElementById('nav-history');
     const settings = document.getElementById('nav-settings');
     list.appendChild(sep);
@@ -793,7 +770,6 @@ function loadSbOrder() {
   } catch(e) {}
 }
 
-// Drag & drop sidebar
 let dragSrc = null;
 function initSbDrag() {
   const list = document.getElementById('sbNavList');
@@ -825,13 +801,10 @@ function initSbDrag() {
       else list.insertBefore(dragSrc, nav);
     }
   });
-  // enable draggable only on non-locked navs
   list.querySelectorAll('.nav:not([data-locked])').forEach(n => n.setAttribute('draggable','true'));
-  // locked items jamais grabable
   list.querySelectorAll('.nav[data-locked]').forEach(n => { n.style.cursor='pointer'; });
 }
 
-// ── SINGLE TIMER enforcement ──
 function startTimerSingle(data) {
   const existingIds = Object.keys(activeTimers);
   const hadTimer = existingIds.length > 0;
@@ -883,6 +856,7 @@ function buildTimerCard(t) {
         <div class="add-lbl">Ajuster le temps</div>
         <div class="add-btns" id="tc-addbts-${t.id}"></div>
         <div class="tc-finish">Fin prévue : <span id="tc-end-${t.id}">—</span></div>
+        <div id="tc-music-${t.id}" style="font-size:11px;color:var(--accent);margin-top:4px;display:none;"></div>
       </div>
     </div>`;
   return el;
@@ -897,7 +871,6 @@ function renderQuickBtns(timerId) {
     const lbl = (pos ? '+' : '−') + fmtDur(Math.abs(secs));
     return `<div class="add-btn" data-pos="${pos}" onclick="addTime(${timerId},${secs})">${lbl}</div>`;
   }).join('');
-  // Style négatifs différemment
   el.querySelectorAll('.add-btn[data-pos="false"]').forEach(b => {
     b.style.color = 'var(--danger)';
     b.style.borderColor = 'rgba(239,91,110,.2)';
@@ -919,6 +892,8 @@ function updateTimerCard(id) {
   if (fin) fin.textContent=`Fin à ${tf}`;
   if (end) end.textContent=tf;
   if (card){card.classList.toggle('paused-tc',t.paused);card.classList.toggle('active-tc',!t.paused);}
+  const musicEl = document.getElementById(`tc-music-${id}`);
+  if (musicEl) musicEl.style.display = t.waitingMusic ? 'block' : 'none';
   if (pauseBtn) pauseBtn.innerHTML=t.paused
     ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
     :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
@@ -946,7 +921,6 @@ function togglePause(id) {
 }
 function addTime(id,secs){
   if (secs < 0) {
-    // Vérifier qu'on ne descend pas sous 5 secondes
     const t = activeTimers[id];
     if (t && t.remaining + secs < 5) { notif('warn','Impossible de réduire autant'); return; }
   }
@@ -1054,8 +1028,16 @@ function relaunchHist(i){
 }
 
 function applySettings(){
-  const toggleMap = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', warnOnReplace:'tgl-warnReplace', deleteOnFinish:'tgl-deleteFinish' };
+  const toggleMap = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', warnOnReplace:'tgl-warnReplace', deleteOnFinish:'tgl-deleteFinish', waitForMusic:'tgl-waitMusic' };
   Object.entries(toggleMap).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.className='toggle'+(settings[k]?' on':'');});
+  const maxEl = document.getElementById('waitMusicMaxRow');
+  if (maxEl) maxEl.style.display = settings.waitForMusic ? 'flex' : 'none';
+  const maxIn = document.getElementById('in-waitMusicMaxH');
+  if (maxIn) {
+    const h=Math.floor((settings.waitForMusicMaxSecs||0)/3600), m=Math.floor(((settings.waitForMusicMaxSecs||0)%3600)/60);
+    document.getElementById('in-waitMusicMaxH').value=h;
+    document.getElementById('in-waitMusicMaxM').value=m;
+  }
   renderThresholdList();
   renderQbPreview();
   function fillHms(secs, prefix) {
@@ -1117,7 +1099,6 @@ document.addEventListener('mousedown', e => {
   }
 });
 
-// ── NOTIFICATION THRESHOLDS ──
 function secsToHms(s){return{h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60};}
 function hmsToSecs(h,m,s){return h*3600+m*60+s;}
 
@@ -1172,7 +1153,6 @@ function saveHmsSetting(key, prefix) {
   const total=h*3600+m*60+s;
   if(total>0){settings[key]=total;ipc('save-settings',settings);}
 }
-// ── QUICK BUTTONS EDITOR ──
 let qbEditing = false;
 function toggleQbEdit() {
   qbEditing = !qbEditing;
@@ -1252,7 +1232,27 @@ function renderAllQuickBtns() {
   Object.keys(activeTimers).forEach(id => renderQuickBtns(id));
 }
 
+function saveWaitMusicMax() {
+  const h = parseInt(document.getElementById('in-waitMusicMaxH').value)||0;
+  const m = parseInt(document.getElementById('in-waitMusicMaxM').value)||0;
+  settings.waitForMusicMaxSecs = h*3600 + m*60;
+  ipc('save-settings', settings);
+}
 function togSet(key,tglId){settings[key]=!settings[key];ipc('save-settings',settings);applySettings();}
+
+ipcRenderer.on('timer-waiting-music', (e, {id}) => {
+  if (!activeTimers[id]) return;
+  activeTimers[id].waitingMusic = true;
+  renderTimerCards(); updateStatus();
+  notif('info', 'Timer terminé — en attente de la fin de la musique…');
+});
+ipcRenderer.on('timer-music-status', (e, {id, playing, elapsed, maxSecs}) => {
+  const el = document.getElementById(`tc-music-${id}`);
+  if (!el) return;
+  const elStr = fmtHMS(elapsed);
+  const maxStr = maxSecs > 0 ? ` / max ${fmtHMS(maxSecs)}` : '';
+  el.textContent = `🎵 Attente fin musique… ${elStr}${maxStr}`;
+});
 
 function fmtHMS(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
 function fmtDur(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;if(h>0&&m>0)return`${h}h ${m}min`;if(h>0)return`${h}h`;if(m>0&&ss>0)return`${m}min ${ss}s`;if(m>0)return`${m} min`;return`${ss}s`;}

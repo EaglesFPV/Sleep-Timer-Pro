@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, dialog, Notification, globalShortcut } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 
 let mainWindow;
@@ -20,6 +20,8 @@ let settings = {
   minimizeToTray: true,
   warnOnReplace: true,
   deleteOnFinish: true,
+  waitForMusic: false,
+  waitForMusicMaxSecs: 0,
   shortcuts: {
     cancel: 'CommandOrControl+Alt+S',
     pause:  'CommandOrControl+Alt+P',
@@ -43,6 +45,24 @@ function loadData() {
 
 function saveActions() { try { fs.writeFileSync(DATA_FILE, JSON.stringify(actionsData, null, 2)); } catch(e) {} }
 function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); } catch(e) {} }
+
+function isMusicPlaying() {
+  try {
+    const ps = `
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
+$mgr = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync().GetAwaiter().GetResult()
+$session = $mgr.GetCurrentSession()
+if ($null -eq $session) { exit 1 }
+$info = $session.GetPlaybackInfo()
+if ($info.PlaybackStatus -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) { exit 0 } else { exit 1 }
+`;
+    execSync(`powershell -NoProfile -NonInteractive -Command "${ps.replace(/\n/g,' ')}"`, { timeout: 3000, windowsHide: true });
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -97,7 +117,7 @@ function updateTrayMenu() {
   const timerItems = activeTimers.length === 0
     ? [{ label: 'Aucun timer actif', enabled: false }]
     : activeTimers.map(t => ({
-        label: `${t.actionName} — ${formatTime(t.remaining)}`,
+        label: `${t.actionName} — ${t.waitingMusic ? 'Attente fin musique…' : formatTime(t.remaining)}`,
         enabled: false
       }));
 
@@ -112,6 +132,48 @@ function updateTrayMenu() {
   tray.setContextMenu(menu);
 }
 
+function startMusicWait(id, actionData) {
+  const t = timers[id];
+  if (!t) return;
+
+  t.waitingMusic = true;
+  t.musicWaitStart = Date.now();
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('timer-waiting-music', { id });
+  }
+  updateTrayMenu();
+
+  const maxMs = (settings.waitForMusicMaxSecs && settings.waitForMusicMaxSecs > 0)
+    ? settings.waitForMusicMaxSecs * 1000
+    : null;
+
+  t.musicInterval = setInterval(() => {
+    if (!timers[id]) { clearInterval(t.musicInterval); return; }
+
+    const elapsed = Date.now() - t.musicWaitStart;
+    if (maxMs && elapsed >= maxMs) {
+      clearInterval(t.musicInterval);
+      delete timers[id];
+      updateTrayMenu();
+      executeAction(actionData.type, id);
+      return;
+    }
+
+    const playing = isMusicPlaying();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('timer-music-status', { id, playing, elapsed: Math.floor(elapsed/1000), maxSecs: settings.waitForMusicMaxSecs||0 });
+    }
+
+    if (!playing) {
+      clearInterval(t.musicInterval);
+      delete timers[id];
+      updateTrayMenu();
+      executeAction(actionData.type, id);
+    }
+  }, 5000);
+}
+
 function startTimer(id, seconds, actionData) {
   if (timers[id]) clearInterval(timers[id].interval);
 
@@ -123,6 +185,7 @@ function startTimer(id, seconds, actionData) {
     actionIcon: actionData.actionIcon,
     type: actionData.type,
     paused: false,
+    waitingMusic: false,
     notifSentSet: new Set(),
     interval: null
   };
@@ -156,9 +219,13 @@ function startTimer(id, seconds, actionData) {
 
     if (t.remaining <= 0) {
       clearInterval(t.interval);
-      delete timers[id];
-      updateTrayMenu();
-      executeAction(actionData.type, id);
+      if (settings.waitForMusic && isMusicPlaying()) {
+        startMusicWait(id, actionData);
+      } else {
+        delete timers[id];
+        updateTrayMenu();
+        executeAction(actionData.type, id);
+      }
     }
   }, 1000);
 
@@ -196,6 +263,7 @@ function sendWindowsNotification(timerId, t, threshold) {
 function cancelTimer(id) {
   if (timers[id]) {
     clearInterval(timers[id].interval);
+    if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
     delete timers[id];
   }
   updateTrayMenu();
@@ -206,6 +274,7 @@ function cancelTimer(id) {
 function cancelAllTimers() {
   Object.keys(timers).forEach(id => {
     clearInterval(timers[id].interval);
+    if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
     mainWindow.webContents.send('timer-cancelled', parseInt(id));
   });
   timers = {};
@@ -275,6 +344,7 @@ ipcMain.on('window-close', () => {
 ipcMain.on('start-timer', (e, data) => {
   Object.keys(timers).forEach(id => {
     clearInterval(timers[id].interval);
+    if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
     mainWindow.webContents.send('timer-cancelled', parseInt(id));
   });
   timers = {};
@@ -336,6 +406,7 @@ function registerShortcuts() {
     if (ids.length > 0) {
       ids.forEach(id => {
         clearInterval(timers[id].interval);
+        if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
         if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', parseInt(id));
       });
       timers = {};
