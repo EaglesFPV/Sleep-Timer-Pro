@@ -1,0 +1,38 @@
+{
+  "name": "sleeptimer-pro",
+  "version": "1.0.0",
+  "description": "SleepTimer Pro - Gestionnaire d'arrêt programmé",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.sleeptimerpro.app",
+    "productName": "SleepTimer Pro",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SleepTimer Pro",
+      "runAfterFinish": true,
+      "installerLanguages": ["fr-FR"],
+      "language": "1036"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}
