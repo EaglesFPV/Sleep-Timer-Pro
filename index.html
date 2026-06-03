@@ -6,31 +6,25 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{--bg-deep:#04080F;--bg-main:#080C18;--bg-card:#0C1120;--bg-card2:#101628;--bg-hover:#161E32;--border:rgba(90,120,210,0.1);--border-hi:rgba(100,149,237,0.35);--text-1:#EDF0FF;--text-2:#6E84B0;--text-3:#2E3D5A;--accent:#5B8DEF;--accent2:#9B7FE8;--danger:#EF5B6E;--warn:#F0A050;--ok:#3EC9A7;--r:12px;--r-sm:8px;}
-body.light{
-  --bg-deep:#E4E7F2;--bg-main:#EEF0FA;--bg-card:#FFFFFF;--bg-card2:#E8EBF5;--bg-hover:#DCE0EF;
-  --border:rgba(80,100,180,0.18);--border-hi:rgba(60,100,210,0.45);
-  --text-1:#0D1530;--text-2:#3D4D78;--text-3:#8A94B8;
-  --accent:#2F63D4;--accent2:#6045B8;--danger:#CC2233;--warn:#A05800;--ok:#157850;
-  --r:12px;--r-sm:8px;
-}
-body.light .wbtn:hover{ background:var(--bg-hover);color:var(--text-1); }
-body.light .wbtn.cls:hover{ background:var(--danger);color:#fff; }
-body.light .sb{ background:var(--bg-deep); }
-body.light .sb-label{ color:var(--text-3); }
-body.light .nav.on{ background:rgba(47,99,212,0.1);color:var(--text-1); }
-body.light .sb-timer-chip{ background:var(--bg-card);color:var(--text-1); }
-body.light .overlay{ background:rgba(100,110,150,0.5); }
-body.light .tag-sleep{ background:rgba(47,99,212,.1);color:#2F63D4; }
-body.light .tag-shutdown{ background:rgba(204,34,51,.1);color:#CC2233; }
-body.light .tag-restart{ background:rgba(160,88,0,.1);color:#A05800; }
-body.light .tag-hibernate{ background:rgba(96,69,184,.1);color:#6045B8; }
-body.light .tag-lock{ background:rgba(21,120,80,.1);color:#157850; }
-body.light .tag-logoff{ background:rgba(180,40,20,.1);color:#B42814; }
-body.light .notif{ background:#fff;border-color:var(--border-hi);box-shadow:0 4px 16px rgba(0,0,0,.12); }
-body.light .exec-ov{ background:rgba(238,240,250,.97); }
-body.light .exec-sub{ color:var(--text-2); }
-body.light ::-webkit-scrollbar-thumb{ background:var(--bg-hover); }
-body.light .toggle{ background:var(--bg-card2);border-color:var(--border); }
+body.light{--bg-deep:#E4E7F2;--bg-main:#EEF0FA;--bg-card:#FFFFFF;--bg-card2:#E8EBF5;--bg-hover:#DCE0EF;--border:rgba(80,100,180,0.18);--border-hi:rgba(60,100,210,0.45);--text-1:#0D1530;--text-2:#3D4D78;--text-3:#8A94B8;--accent:#2F63D4;--accent2:#6045B8;--danger:#CC2233;--warn:#A05800;--ok:#157850;--r:12px;--r-sm:8px;}
+body.light .wbtn:hover{background:var(--bg-hover);color:var(--text-1);}
+body.light .wbtn.cls:hover{background:var(--danger);color:#fff;}
+body.light .sb{background:var(--bg-deep);}
+body.light .sb-label{color:var(--text-3);}
+body.light .nav.on{background:rgba(47,99,212,0.1);color:var(--text-1);}
+body.light .sb-timer-chip{background:var(--bg-card);color:var(--text-1);}
+body.light .overlay{background:rgba(100,110,150,0.5);}
+body.light .tag-sleep{background:rgba(47,99,212,.1);color:#2F63D4;}
+body.light .tag-shutdown{background:rgba(204,34,51,.1);color:#CC2233;}
+body.light .tag-restart{background:rgba(160,88,0,.1);color:#A05800;}
+body.light .tag-hibernate{background:rgba(96,69,184,.1);color:#6045B8;}
+body.light .tag-lock{background:rgba(21,120,80,.1);color:#157850;}
+body.light .tag-logoff{background:rgba(180,40,20,.1);color:#B42814;}
+body.light .notif{background:#fff;border-color:var(--border-hi);box-shadow:0 4px 16px rgba(0,0,0,.12);}
+body.light .exec-ov{background:rgba(238,240,250,.97);}
+body.light .exec-sub{color:var(--text-2);}
+body.light ::-webkit-scrollbar-thumb{background:var(--bg-hover);}
+body.light .toggle{background:var(--bg-card2);border-color:var(--border);}
 .theme-toggle{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:transparent;border:none;cursor:pointer;transition:all .2s;-webkit-app-region:no-drag;}
 .theme-toggle:hover{background:var(--bg-hover);}
 .theme-toggle svg{width:15px;height:15px;flex-shrink:0;stroke:var(--text-2);transition:stroke .2s;}
@@ -145,6 +139,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg-main);color:var(--text-
 .ac-bar{position:absolute;bottom:0;left:0;right:0;height:2px;opacity:.5;transition:opacity .2s;}
 .ac:hover .ac-bar{opacity:1;}
 .ac-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%;}
+.ac-music-badge{position:absolute;bottom:8px;right:8px;font-size:9px;opacity:.6;}
 .power-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
 .pw{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 8px;border-radius:var(--r-sm);background:var(--bg-card);border:1px solid var(--border);cursor:pointer;transition:all .15s;}
 .pw:hover{transform:translateY(-2px);background:var(--bg-hover);border-color:var(--border-hi);}
@@ -232,6 +227,9 @@ select.f-input option{background:var(--bg-card2);}
 .csw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .csw.sel{border-color:#fff;transform:scale(1.18);}
 .modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+.f-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border);border-radius:var(--r-sm);}
+.f-toggle-row .f-toggle-label{font-size:12px;font-weight:600;color:var(--text-2);}
+.f-toggle-row .f-toggle-desc{font-size:10px;color:var(--text-3);margin-top:1px;}
 .exec-ov{position:fixed;inset:0;background:rgba(4,8,15,.97);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:18px;}
 .exec-ov.open{display:flex;}
 .spinner{width:52px;height:52px;border:3px solid rgba(91,141,239,.15);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;}
@@ -301,7 +299,6 @@ select.f-input option{background:var(--bg-card2);}
   <div class="sb-timers" id="sbTimers" style="display:none"></div>
 </div>
 <div class="main">
-  <!-- PAGE: TIMERS ACTIFS -->
   <div class="page on" id="p-timers">
     <div class="sh">
       <div><div class="sh-title">Timers actifs</div><div class="sh-sub" id="timerCount">Aucun timer en cours</div></div>
@@ -321,7 +318,6 @@ select.f-input option{background:var(--bg-card2);}
       </div>
     </div>
   </div>
-  <!-- PAGE: ACTIONS RAPIDES -->
   <div class="page" id="p-actions">
     <div class="sh">
       <div><div class="sh-title">Actions rapides</div><div class="sh-sub">Cliquez pour démarrer un timer</div></div>
@@ -329,12 +325,7 @@ select.f-input option{background:var(--bg-card2);}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Gérer
       </button>
     </div>
-    <div class="actions-grid" id="actionsGrid">
-      <div class="empty-state" style="grid-column:1/-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <p>Aucune action. Créez-en une dans "Mes actions".</p>
-      </div>
-    </div>
+    <div class="actions-grid" id="actionsGrid"></div>
     <div>
       <div class="sh" style="margin-bottom:12px;"><div><div class="sh-title">Actions immédiates</div><div class="sh-sub">Exécution instantanée</div></div></div>
       <div class="power-row">
@@ -361,7 +352,6 @@ select.f-input option{background:var(--bg-card2);}
       </div>
     </div>
   </div>
-  <!-- PAGE: TIMER LIBRE -->
   <div class="page" id="p-custom">
     <div class="sh"><div class="sh-title">Timer libre</div></div>
     <div class="time-card">
@@ -420,7 +410,6 @@ select.f-input option{background:var(--bg-card2);}
       </button>
     </div>
   </div>
-  <!-- PAGE: MES ACTIONS -->
   <div class="page" id="p-manage">
     <div class="sh">
       <div><div class="sh-title">Mes actions</div></div>
@@ -430,7 +419,6 @@ select.f-input option{background:var(--bg-card2);}
     </div>
     <div class="manage-list" id="manageList"></div>
   </div>
-  <!-- PAGE: HISTORIQUE -->
   <div class="page" id="p-history">
     <div class="sh">
       <div><div class="sh-title">Historique</div></div>
@@ -440,7 +428,6 @@ select.f-input option{background:var(--bg-card2);}
     </div>
     <div style="display:flex;flex-direction:column;gap:7px;" id="histList"></div>
   </div>
-  <!-- PAGE: PARAMÈTRES -->
   <div class="page" id="p-settings">
     <div class="sh-title" style="margin-bottom:4px;">Paramètres</div>
     <div class="set-card">
@@ -497,7 +484,7 @@ select.f-input option{background:var(--bg-card2);}
         <div class="toggle on" id="tgl-deleteFinish" onclick="togSet('deleteOnFinish','tgl-deleteFinish')"></div>
       </div>
       <div class="set-item">
-        <div><div class="set-name">Attendre la fin de la musique</div><div class="set-desc">Exécute l'action seulement quand la musique s'arrête (Spotify, navigateur…)</div></div>
+        <div><div class="set-name">Attendre la fin de la musique (défaut)</div><div class="set-desc">Comportement par défaut pour les actions sans réglage individuel</div></div>
         <div class="toggle" id="tgl-waitMusic" onclick="togSet('waitForMusic','tgl-waitMusic')"></div>
       </div>
       <div class="set-item" id="waitMusicMaxRow" style="display:none;">
@@ -528,7 +515,6 @@ select.f-input option{background:var(--bg-card2);}
   </div>
 </div>
 </div>
-<!-- MODAL -->
 <div class="overlay" id="modal">
   <div class="modal">
     <div class="modal-title">
@@ -554,13 +540,22 @@ select.f-input option{background:var(--bg-card2);}
         <option value="lock">Verrouillage</option><option value="logoff">Déconnexion</option>
       </select>
     </div>
+    <div class="f-row">
+      <div class="f-lbl">Attendre la fin de la musique</div>
+      <div class="f-toggle-row">
+        <div>
+          <div class="f-toggle-label">Pause ou changement de piste déclenche l'action</div>
+          <div class="f-toggle-desc">Remplace le réglage global pour cette action</div>
+        </div>
+        <div class="toggle" id="fWaitMusic" onclick="toggleModalMusic()"></div>
+      </div>
+    </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal()">Annuler</button>
       <button class="btn btn-primary" onclick="saveAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer</button>
     </div>
   </div>
 </div>
-<!-- EXEC OVERLAY -->
 <div class="exec-ov" id="execOv">
   <div class="spinner"></div>
   <div class="exec-title">
@@ -592,12 +587,8 @@ const ICON_KEYS = Object.keys(ICONS);
 const COLORS = ['#5B8DEF','#9B7FE8','#EF5B6E','#3EC9A7','#F0A050','#5BC4EF','#A0EF5B','#EF5BB5','#F0D050'];
 
 const TYPE_COLORS = {
-  sleep:     '#FFB347',
-  shutdown:  '#FF4757',
-  restart:   '#FFD32A',
-  hibernate: '#FF6B9D',
-  lock:      '#A8FF3E',
-  logoff:    '#FF6348',
+  sleep:'#FFB347', shutdown:'#FF4757', restart:'#FFD32A',
+  hibernate:'#FF6B9D', lock:'#A8FF3E', logoff:'#FF6348',
 };
 const TYPE_ICONS_SVG = {
   sleep:     '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
@@ -607,7 +598,6 @@ const TYPE_ICONS_SVG = {
   lock:      '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
   logoff:    '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
 };
-
 const NOTIF_ICONS = {
   ok:     { color:'#3EC9A7', path:'<polyline points="20 6 9 17 4 12"/>' },
   warn:   { color:'#F0A050', path:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
@@ -619,9 +609,14 @@ const NOTIF_ICONS = {
   trash:  { color:'#FF4757', path:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>' },
 };
 
-let actions = [], settings = { notifEnabled:true, notifTimes:[300], addTimeAmount:600, minimizeToTray:true, warnOnReplace:true, deleteOnFinish:true, waitForMusic:false, waitForMusicMaxSecs:0, quickTimeButtons:[300,600,900,1800,3600,-300,-600,-900] };
+let actions = [], settings = {
+  notifEnabled:true, notifTimes:[300], addTimeAmount:600, minimizeToTray:true,
+  warnOnReplace:true, deleteOnFinish:true, waitForMusic:false, waitForMusicMaxSecs:0,
+  quickTimeButtons:[300,600,900,1800,3600,-300,-600,-900]
+};
 let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist')||'[]');
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
+let modalWaitForMusic = false;
 
 ipcRenderer.on('actions-data', (e,d) => { actions=d; renderActions(); renderManage(); });
 ipcRenderer.on('settings-data', (e,d) => { settings={...settings,...d}; applySettings(); });
@@ -642,7 +637,6 @@ ipcRenderer.on('timer-tick', (e,{id,remaining,total}) => {
 });
 ipcRenderer.on('timer-cancelled', (e,id) => {
   delete activeTimers[id]; renderTimerCards(); updateSidebar(); updateStatus();
-  notif('cancel','Timer annulé');
 });
 ipcRenderer.on('others-paused', (e,activeId) => {
   Object.keys(activeTimers).forEach(id => { if (parseInt(id)!==activeId) activeTimers[id].paused=true; });
@@ -762,12 +756,12 @@ function loadSbOrder() {
       const el = document.getElementById(id);
       if (el && !el.dataset.locked) list.insertBefore(el, sep);
     });
-    const history  = document.getElementById('nav-history');
-    const settings = document.getElementById('nav-settings');
+    const histEl = document.getElementById('nav-history');
+    const setEl  = document.getElementById('nav-settings');
     list.appendChild(sep);
-    if (history)  list.appendChild(history);
-    if (settings) list.appendChild(settings);
-  } catch(e) {}
+    if (histEl) list.appendChild(histEl);
+    if (setEl)  list.appendChild(setEl);
+  } catch {}
 }
 
 let dragSrc = null;
@@ -802,13 +796,11 @@ function initSbDrag() {
     }
   });
   list.querySelectorAll('.nav:not([data-locked])').forEach(n => n.setAttribute('draggable','true'));
-  list.querySelectorAll('.nav[data-locked]').forEach(n => { n.style.cursor='pointer'; });
 }
 
 function startTimerSingle(data) {
-  const existingIds = Object.keys(activeTimers);
-  const hadTimer = existingIds.length > 0;
-  if (hadTimer) existingIds.forEach(id => ipc('cancel-timer', parseInt(id)));
+  const hadTimer = Object.keys(activeTimers).length > 0;
+  if (hadTimer) Object.keys(activeTimers).forEach(id => ipc('cancel-timer', parseInt(id)));
   ipc('start-timer', data);
   if (hadTimer && settings.warnOnReplace) notif('warn', 'Timer remplacé');
 }
@@ -816,15 +808,12 @@ function startTimerSingle(data) {
 function renderTimerCards() {
   const list = document.getElementById('timersList');
   const ids = Object.keys(activeTimers);
-  document.getElementById('emptyTimers').style.display = ids.length?'none':'flex';
-  document.getElementById('cancelAllBtn').style.display = ids.length>1?'flex':'none';
-  document.getElementById('timerCount').textContent = ids.length?`${ids.length} timer${ids.length>1?'s':''} en cours`:'Aucun timer en cours';
+  document.getElementById('emptyTimers').style.display = ids.length ? 'none' : 'flex';
+  document.getElementById('cancelAllBtn').style.display = ids.length > 1 ? 'flex' : 'none';
+  document.getElementById('timerCount').textContent = ids.length ? `${ids.length} timer${ids.length>1?'s':''} en cours` : 'Aucun timer en cours';
   list.querySelectorAll('.tc[data-tid]').forEach(el => { if (!activeTimers[el.dataset.tid]) el.remove(); });
   ids.forEach(id => {
-    const t = activeTimers[id];
-    if (!document.querySelector(`.tc[data-tid="${id}"]`)) {
-      list.appendChild(buildTimerCard(t));
-    }
+    if (!document.querySelector(`.tc[data-tid="${id}"]`)) list.appendChild(buildTimerCard(activeTimers[id]));
     renderQuickBtns(id);
     updateTimerCard(id);
   });
@@ -832,8 +821,8 @@ function renderTimerCards() {
 
 function buildTimerCard(t) {
   const el = document.createElement('div');
-  el.className='tc active-tc'; el.dataset.tid=t.id;
-  el.innerHTML=`<div class="tc-bar"></div>
+  el.className = 'tc active-tc'; el.dataset.tid = t.id;
+  el.innerHTML = `<div class="tc-bar"></div>
     <div class="tc-top">
       <div class="tc-icon" style="background:${t.color}22">
         <svg viewBox="0 0 24 24" fill="none" stroke="${t.color}" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">${ICONS[t.icon]||ICONS.clock}</svg>
@@ -865,7 +854,7 @@ function buildTimerCard(t) {
 function renderQuickBtns(timerId) {
   const el = document.getElementById(`tc-addbts-${timerId}`);
   if (!el) return;
-  const btns = (settings.quickTimeButtons || [300,600,900,-300,-600,-900]);
+  const btns = settings.quickTimeButtons || [300,600,900,-300,-600,-900];
   el.innerHTML = btns.map(secs => {
     const pos = secs > 0;
     const lbl = (pos ? '+' : '−') + fmtDur(Math.abs(secs));
@@ -878,176 +867,236 @@ function renderQuickBtns(timerId) {
 }
 
 function updateTimerCard(id) {
-  const t=activeTimers[id]; if (!t) return;
-  const hms=document.getElementById(`tc-hms-${id}`); if (!hms) return;
-  const circ=document.getElementById(`tc-circ-${id}`);
-  const fin=document.getElementById(`tc-fin-${id}`);
-  const end=document.getElementById(`tc-end-${id}`);
-  const pauseBtn=document.getElementById(`tc-pause-${id}`);
-  const card=document.querySelector(`.tc[data-tid="${id}"]`);
-  hms.textContent=fmtHMS(t.remaining);
-  circ.style.strokeDashoffset=263.9*(1-t.remaining/Math.max(t.total,1));
-  const finTime=new Date(Date.now()+t.remaining*1000);
-  const tf=finTime.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  if (fin) fin.textContent=`Fin à ${tf}`;
-  if (end) end.textContent=tf;
-  if (card){card.classList.toggle('paused-tc',t.paused);card.classList.toggle('active-tc',!t.paused);}
+  const t = activeTimers[id]; if (!t) return;
+  const hms = document.getElementById(`tc-hms-${id}`); if (!hms) return;
+  const circ = document.getElementById(`tc-circ-${id}`);
+  const fin  = document.getElementById(`tc-fin-${id}`);
+  const end  = document.getElementById(`tc-end-${id}`);
+  const pauseBtn = document.getElementById(`tc-pause-${id}`);
+  const card = document.querySelector(`.tc[data-tid="${id}"]`);
+  hms.textContent = fmtHMS(t.remaining);
+  circ.style.strokeDashoffset = 263.9 * (1 - t.remaining / Math.max(t.total, 1));
+  const tf = new Date(Date.now() + t.remaining * 1000).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  if (fin) fin.textContent = `Fin à ${tf}`;
+  if (end) end.textContent = tf;
+  if (card) { card.classList.toggle('paused-tc', t.paused); card.classList.toggle('active-tc', !t.paused); }
   const musicEl = document.getElementById(`tc-music-${id}`);
   if (musicEl) musicEl.style.display = t.waitingMusic ? 'block' : 'none';
-  if (pauseBtn) pauseBtn.innerHTML=t.paused
-    ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
-    :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+  if (pauseBtn) pauseBtn.innerHTML = t.paused
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
 }
 
 function updateSidebar() {
-  const ids=Object.keys(activeTimers); const sb=document.getElementById('sbTimers');
-  sb.style.display=ids.length?'flex':'none';
-  sb.innerHTML=ids.map(id=>{const t=activeTimers[id];return`<div class="sb-timer-chip" onclick="showPage('p-timers')"><div class="stc-dot" style="background:${t.color}"></div><div class="stc-name">${t.name}</div><div class="stc-time">${fmtHMS(t.remaining)}</div></div>`;}).join('');
-}
-function updateStatus() {
-  const ids=Object.keys(activeTimers); const dot=document.getElementById('sdot'); const txt=document.getElementById('sbTxt');
-  if (!ids.length){dot.className='sdot';txt.textContent='Aucun timer';return;}
-  const t=activeTimers[ids[0]];
-  const paused=t&&t.paused;
-  dot.className='sdot'+(paused?' pause':' on');
-  txt.textContent=`Timer actif${paused?' (pause)':''}`;
-}
-function togglePause(id) {
-  const t=activeTimers[id]; if (!t) return;
-  t.paused=!t.paused; ipc('pause-timer',{id,paused:t.paused});
-  if (!t.paused) Object.keys(activeTimers).forEach(tid=>{if(parseInt(tid)!==id)activeTimers[tid].paused=true;});
-  renderTimerCards(); updateStatus();
-  notif(t.paused?'pause':'play', t.paused?'Timer en pause':'Timer repris');
-}
-function addTime(id,secs){
-  if (secs < 0) {
+  const ids = Object.keys(activeTimers);
+  const sb = document.getElementById('sbTimers');
+  sb.style.display = ids.length ? 'flex' : 'none';
+  sb.innerHTML = ids.map(id => {
     const t = activeTimers[id];
-    if (t && t.remaining + secs < 5) { notif('warn','Impossible de réduire autant'); return; }
-  }
-  ipc('add-time',{id,seconds:secs});
-  const lbl = secs>0 ? `+${fmtDur(secs)} ajouté` : `−${fmtDur(Math.abs(secs))} retiré`;
-  notif(secs>0?'add':'warn', lbl);
+    return `<div class="sb-timer-chip" onclick="showPage('p-timers')"><div class="stc-dot" style="background:${t.color}"></div><div class="stc-name">${t.name}</div><div class="stc-time">${fmtHMS(t.remaining)}</div></div>`;
+  }).join('');
 }
-function cancelAllTimers(){Object.keys(activeTimers).forEach(id=>ipc('cancel-timer',parseInt(id)));}
-function launchAction(a){
-  startTimerSingle({seconds:a.defaultDuration,actionName:a.name,actionIcon:a.iconKey,type:a.type,color:a.color});
+
+function updateStatus() {
+  const ids = Object.keys(activeTimers);
+  const dot = document.getElementById('sdot');
+  const txt = document.getElementById('sbTxt');
+  if (!ids.length) { dot.className = 'sdot'; txt.textContent = 'Aucun timer'; return; }
+  const paused = activeTimers[ids[0]]?.paused;
+  dot.className = 'sdot' + (paused ? ' pause' : ' on');
+  txt.textContent = `Timer actif${paused ? ' (pause)' : ''}`;
 }
-function clampInput(el,min,max){let v=parseInt(el.value)||0;if(v<min)v=min;if(v>max)v=max;el.value=v;}
-function step(u,d){
-  const el=document.getElementById(u==='h'?'bH':u==='m'?'bM':'bS');
-  const max=u==='h'?23:59; let v=(parseInt(el.value)||0)+d;
-  if(v<0)v=max;if(v>max)v=0; el.value=v;
+
+function togglePause(id) {
+  const t = activeTimers[id]; if (!t) return;
+  t.paused = !t.paused;
+  ipc('pause-timer', {id, paused: t.paused});
+  if (!t.paused) Object.keys(activeTimers).forEach(tid => { if (parseInt(tid) !== id) activeTimers[tid].paused = true; });
+  renderTimerCards(); updateStatus();
+  notif(t.paused ? 'pause' : 'play', t.paused ? 'Timer en pause' : 'Timer repris');
 }
-function setP(s){
-  document.getElementById('bH').value=Math.floor(s/3600);
-  document.getElementById('bM').value=Math.floor((s%3600)/60);
-  document.getElementById('bS').value=s%60;
+
+function addTime(id, secs) {
+  if (secs < 0 && activeTimers[id] && activeTimers[id].remaining + secs < 5) { notif('warn','Impossible de réduire autant'); return; }
+  ipc('add-time', {id, seconds: secs});
+  notif(secs > 0 ? 'add' : 'warn', secs > 0 ? `+${fmtDur(secs)} ajouté` : `−${fmtDur(Math.abs(secs))} retiré`);
 }
-function selType(btn){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');selCustomType=btn.dataset.type;}
-function startCustom(){
+
+function cancelAllTimers() { Object.keys(activeTimers).forEach(id => ipc('cancel-timer', parseInt(id))); }
+
+function launchAction(a) {
+  startTimerSingle({ seconds: a.defaultDuration, actionName: a.name, actionIcon: a.iconKey, type: a.type, color: a.color, waitForMusic: a.waitForMusic });
+}
+
+function clampInput(el,min,max) { let v=parseInt(el.value)||0; if(v<min)v=min; if(v>max)v=max; el.value=v; }
+function step(u,d) {
+  const el = document.getElementById(u==='h'?'bH':u==='m'?'bM':'bS');
+  const max = u==='h'?23:59; let v=(parseInt(el.value)||0)+d;
+  if(v<0)v=max; if(v>max)v=0; el.value=v;
+}
+function setP(s) {
+  document.getElementById('bH').value = Math.floor(s/3600);
+  document.getElementById('bM').value = Math.floor((s%3600)/60);
+  document.getElementById('bS').value = s%60;
+}
+function selType(btn) { document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); selCustomType=btn.dataset.type; }
+function startCustom() {
   const h=parseInt(document.getElementById('bH').value)||0;
   const m=parseInt(document.getElementById('bM').value)||0;
   const s=parseInt(document.getElementById('bS').value)||0;
-  const total=h*3600+m*60+s;
+  const total = h*3600+m*60+s;
   if(total<=0){notif('warn','Durée invalide');return;}
-  const names={sleep:'Veille',shutdown:'Extinction',restart:'Redémarrage',hibernate:'Hibernation',lock:'Verrouillage',logoff:'Déconnexion'};
-  startTimerSingle({seconds:total,actionName:names[selCustomType],actionIcon:selCustomType==='sleep'?'clock':'zap',type:selCustomType,color:TYPE_COLORS[selCustomType]||COLORS[0]});
+  const names = {sleep:'Veille',shutdown:'Extinction',restart:'Redémarrage',hibernate:'Hibernation',lock:'Verrouillage',logoff:'Déconnexion'};
+  startTimerSingle({ seconds:total, actionName:names[selCustomType], actionIcon:selCustomType==='sleep'?'clock':'zap', type:selCustomType, color:TYPE_COLORS[selCustomType]||COLORS[0] });
 }
 
-function renderActions(){
-  const grid=document.getElementById('actionsGrid');
-  if (!actions.length){grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><p>Aucune action. Créez-en une dans "Mes actions".</p></div>`;return;}
-  grid.innerHTML=actions.map(a=>`<div class="ac" onclick='launchAction(${JSON.stringify(a)})'><div class="ac-dot" style="background:${a.color}"></div><div class="ac-icon" style="background:${a.color}22"><svg viewBox="0 0 24 24" fill="none" stroke="${a.color}" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.iconKey]||ICONS.zap}</svg></div><div class="ac-name">${a.name}</div><div class="ac-dur">${fmtDur(a.defaultDuration)} · ${typeName(a.type)}</div><div class="ac-bar" style="background:linear-gradient(90deg,${a.color},transparent)"></div></div>`).join('');
-}
-function renderManage(){
-  const list=document.getElementById('manageList');
-  if (!actions.length){list.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><p>Aucune action créée.</p></div>`;return;}
-  list.innerHTML=actions.map(a=>`<div class="ml-item"><div class="ml-icon" style="background:${a.color}22"><svg viewBox="0 0 24 24" fill="none" stroke="${a.color}" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.iconKey]||ICONS.zap}</svg></div><div style="flex:1"><div class="ml-name">${a.name}</div><div class="ml-dur">${fmtDur(a.defaultDuration)} · ${typeName(a.type)}</div></div><div class="ml-dot" style="background:${a.color}"></div><div class="ml-actions"><button class="btn" onclick="editAction(${a.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Modifier</button><button class="btn btn-danger" onclick="deleteAction(${a.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Supprimer</button></div></div>`).join('');
+function renderActions() {
+  const grid = document.getElementById('actionsGrid');
+  if (!actions.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><p>Aucune action. Créez-en une dans "Mes actions".</p></div>`;
+    return;
+  }
+  grid.innerHTML = actions.map(a => `
+    <div class="ac" onclick='launchAction(${JSON.stringify(a)})'>
+      <div class="ac-dot" style="background:${a.color}"></div>
+      <div class="ac-icon" style="background:${a.color}22"><svg viewBox="0 0 24 24" fill="none" stroke="${a.color}" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.iconKey]||ICONS.zap}</svg></div>
+      <div class="ac-name">${a.name}</div>
+      <div class="ac-dur">${fmtDur(a.defaultDuration)} · ${typeName(a.type)}</div>
+      ${a.waitForMusic ? '<div class="ac-music-badge">🎵</div>' : ''}
+      <div class="ac-bar" style="background:linear-gradient(90deg,${a.color},transparent)"></div>
+    </div>`).join('');
 }
 
-function buildIconGrid(){document.getElementById('iconGrid').innerHTML=ICON_KEYS.map(k=>`<div class="icon-pick ${k===selIcon?'sel':''}" onclick="pickIcon(this,'${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">${ICONS[k]}</svg></div>`).join('');}
-function buildColorRow(){document.getElementById('colorRow').innerHTML=COLORS.map(c=>`<div class="csw ${c===selColor?'sel':''}" style="background:${c}" onclick="pickColor(this,'${c}')"></div>`).join('');}
-function pickIcon(el,k){selIcon=k;document.querySelectorAll('.icon-pick').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
-function pickColor(el,c){selColor=c;document.querySelectorAll('.csw').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function renderManage() {
+  const list = document.getElementById('manageList');
+  if (!actions.length) {
+    list.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><p>Aucune action créée.</p></div>`;
+    return;
+  }
+  list.innerHTML = actions.map(a => `
+    <div class="ml-item">
+      <div class="ml-icon" style="background:${a.color}22"><svg viewBox="0 0 24 24" fill="none" stroke="${a.color}" stroke-linecap="round" stroke-linejoin="round">${ICONS[a.iconKey]||ICONS.zap}</svg></div>
+      <div style="flex:1"><div class="ml-name">${a.name}${a.waitForMusic?' 🎵':''}</div><div class="ml-dur">${fmtDur(a.defaultDuration)} · ${typeName(a.type)}</div></div>
+      <div class="ml-dot" style="background:${a.color}"></div>
+      <div class="ml-actions">
+        <button class="btn" onclick="editAction(${a.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Modifier</button>
+        <button class="btn btn-danger" onclick="deleteAction(${a.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Supprimer</button>
+      </div>
+    </div>`).join('');
+}
 
-function openModal(){
-  editingId=null;selIcon='music';selColor=COLORS[0];
-  document.getElementById('modalTitle').textContent='Nouvelle action';
-  document.getElementById('fName').value='';
-  document.getElementById('dH').value=1;document.getElementById('dM').value=30;document.getElementById('dS').value=0;
-  document.getElementById('fType').value='sleep';
-  buildIconGrid();buildColorRow();document.getElementById('modal').classList.add('open');
+function buildIconGrid() {
+  document.getElementById('iconGrid').innerHTML = ICON_KEYS.map(k =>
+    `<div class="icon-pick ${k===selIcon?'sel':''}" onclick="pickIcon(this,'${k}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">${ICONS[k]}</svg></div>`
+  ).join('');
 }
-function editAction(id){
-  const a=actions.find(x=>x.id===id);if(!a)return;
-  editingId=id;selIcon=a.iconKey||'music';selColor=a.color||COLORS[0];
-  document.getElementById('modalTitle').textContent="Modifier l'action";
-  document.getElementById('fName').value=a.name;
-  document.getElementById('dH').value=Math.floor(a.defaultDuration/3600);
-  document.getElementById('dM').value=Math.floor((a.defaultDuration%3600)/60);
-  document.getElementById('dS').value=a.defaultDuration%60;
-  document.getElementById('fType').value=a.type;
-  buildIconGrid();buildColorRow();document.getElementById('modal').classList.add('open');
+function buildColorRow() {
+  document.getElementById('colorRow').innerHTML = COLORS.map(c =>
+    `<div class="csw ${c===selColor?'sel':''}" style="background:${c}" onclick="pickColor(this,'${c}')"></div>`
+  ).join('');
 }
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-function saveAction(){
-  const name=document.getElementById('fName').value.trim();
-  if(!name){notif('warn','Veuillez saisir un nom');return;}
-  const h=parseInt(document.getElementById('dH').value)||0;
-  const m=parseInt(document.getElementById('dM').value)||0;
-  const s=parseInt(document.getElementById('dS').value)||0;
-  const dur=h*3600+m*60+s;
-  if(dur<=0){notif('warn','Durée invalide');return;}
-  const a={id:editingId||Date.now(),name,iconKey:selIcon,color:selColor,defaultDuration:dur,type:document.getElementById('fType').value};
-  if(editingId)actions=actions.map(x=>x.id===editingId?a:x);else actions.push(a);
-  ipc('save-actions',actions);renderActions();renderManage();closeModal();
-  notif('ok',editingId?'Action modifiée':'Action créée');
-}
-function deleteAction(id){actions=actions.filter(a=>a.id!==id);ipc('save-actions',actions);renderActions();renderManage();notif('trash','Action supprimée');}
+function pickIcon(el,k)  { selIcon=k;  document.querySelectorAll('.icon-pick').forEach(e=>e.classList.remove('sel')); el.classList.add('sel'); }
+function pickColor(el,c) { selColor=c; document.querySelectorAll('.csw').forEach(e=>e.classList.remove('sel')); el.classList.add('sel'); }
 
-function addHist(type, timerData){
-  history.unshift({type, date:new Date().toISOString(), timerData: timerData||null});
-  if(history.length>50)history.pop();
-  localStorage.setItem('stp2_hist',JSON.stringify(history));
+function toggleModalMusic() {
+  modalWaitForMusic = !modalWaitForMusic;
+  const el = document.getElementById('fWaitMusic');
+  el.className = 'toggle' + (modalWaitForMusic ? ' on' : '');
+}
+
+function openModal() {
+  editingId = null; selIcon = 'music'; selColor = COLORS[0]; modalWaitForMusic = false;
+  document.getElementById('modalTitle').textContent = 'Nouvelle action';
+  document.getElementById('fName').value = '';
+  document.getElementById('dH').value = 1;
+  document.getElementById('dM').value = 30;
+  document.getElementById('dS').value = 0;
+  document.getElementById('fType').value = 'sleep';
+  document.getElementById('fWaitMusic').className = 'toggle';
+  buildIconGrid(); buildColorRow();
+  document.getElementById('modal').classList.add('open');
+}
+
+function editAction(id) {
+  const a = actions.find(x=>x.id===id); if (!a) return;
+  editingId = id; selIcon = a.iconKey||'music'; selColor = a.color||COLORS[0];
+  modalWaitForMusic = !!a.waitForMusic;
+  document.getElementById('modalTitle').textContent = "Modifier l'action";
+  document.getElementById('fName').value = a.name;
+  document.getElementById('dH').value = Math.floor(a.defaultDuration/3600);
+  document.getElementById('dM').value = Math.floor((a.defaultDuration%3600)/60);
+  document.getElementById('dS').value = a.defaultDuration%60;
+  document.getElementById('fType').value = a.type;
+  document.getElementById('fWaitMusic').className = 'toggle' + (modalWaitForMusic ? ' on' : '');
+  buildIconGrid(); buildColorRow();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function saveAction() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { notif('warn','Veuillez saisir un nom'); return; }
+  const h = parseInt(document.getElementById('dH').value)||0;
+  const m = parseInt(document.getElementById('dM').value)||0;
+  const s = parseInt(document.getElementById('dS').value)||0;
+  const dur = h*3600+m*60+s;
+  if (dur <= 0) { notif('warn','Durée invalide'); return; }
+  const a = { id: editingId||Date.now(), name, iconKey: selIcon, color: selColor, defaultDuration: dur, type: document.getElementById('fType').value, waitForMusic: modalWaitForMusic };
+  if (editingId) actions = actions.map(x=>x.id===editingId?a:x); else actions.push(a);
+  ipc('save-actions', actions); renderActions(); renderManage(); closeModal();
+  notif('ok', editingId ? 'Action modifiée' : 'Action créée');
+}
+
+function deleteAction(id) { actions = actions.filter(a=>a.id!==id); ipc('save-actions',actions); renderActions(); renderManage(); notif('trash','Action supprimée'); }
+
+function addHist(type, timerData) {
+  history.unshift({ type, date: new Date().toISOString(), timerData: timerData||null });
+  if (history.length > 50) history.pop();
+  localStorage.setItem('stp2_hist', JSON.stringify(history));
   renderHist();
 }
-function clearHist(){history=[];localStorage.setItem('stp2_hist','[]');renderHist();}
-function renderHist(){
-  const el=document.getElementById('histList');
-  if(!history.length){el.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg><p>Aucun historique.</p></div>`;return;}
-  el.innerHTML=history.map((h,i)=>{
-    const d=new Date(h.date);const col=TYPE_COLORS[h.type]||'#FFB347';
+function clearHist() { history = []; localStorage.setItem('stp2_hist','[]'); renderHist(); }
+function renderHist() {
+  const el = document.getElementById('histList');
+  if (!history.length) {
+    el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg><p>Aucun historique.</p></div>`;
+    return;
+  }
+  el.innerHTML = history.map((h,i) => {
+    const d = new Date(h.date);
+    const col = TYPE_COLORS[h.type]||'#FFB347';
     const relaunchBtn = h.timerData ? `<button class="btn" style="margin-left:auto;flex-shrink:0" onclick='relaunchHist(${i})'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Relancer</button>` : '';
-    return`<div class="hist-item"><div class="hist-icon" style="background:${col}22"><svg viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">${TYPE_ICONS_SVG[h.type]||ICONS.zap}</svg></div><div style="flex:1"><div class="hist-name">${typeName(h.type)}${h.timerData?` — ${fmtDur(h.timerData.seconds)}`:''}${h.timerData?.actionName&&h.timerData.actionName!==typeName(h.type)?` · ${h.timerData.actionName}`:''}</div><div class="hist-time">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div></div>${relaunchBtn}</div>`;
+    return `<div class="hist-item">
+      <div class="hist-icon" style="background:${col}22"><svg viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">${TYPE_ICONS_SVG[h.type]||ICONS.zap}</svg></div>
+      <div style="flex:1"><div class="hist-name">${typeName(h.type)}${h.timerData?` — ${fmtDur(h.timerData.seconds)}`:''}${h.timerData?.actionName&&h.timerData.actionName!==typeName(h.type)?` · ${h.timerData.actionName}`:''}</div>
+      <div class="hist-time">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div></div>
+      ${relaunchBtn}</div>`;
   }).join('');
 }
-function relaunchHist(i){
-  const h=history[i]; if(!h||!h.timerData) return;
+function relaunchHist(i) {
+  const h = history[i]; if (!h||!h.timerData) return;
   startTimerSingle(h.timerData);
-  notif('play',`Timer relancé : ${h.timerData.actionName}`);
+  notif('play', `Timer relancé : ${h.timerData.actionName}`);
 }
 
-function applySettings(){
+function applySettings() {
   const toggleMap = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', warnOnReplace:'tgl-warnReplace', deleteOnFinish:'tgl-deleteFinish', waitForMusic:'tgl-waitMusic' };
-  Object.entries(toggleMap).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.className='toggle'+(settings[k]?' on':'');});
+  Object.entries(toggleMap).forEach(([k,id]) => { const el=document.getElementById(id); if(el) el.className='toggle'+(settings[k]?' on':''); });
   const maxEl = document.getElementById('waitMusicMaxRow');
   if (maxEl) maxEl.style.display = settings.waitForMusic ? 'flex' : 'none';
-  const maxIn = document.getElementById('in-waitMusicMaxH');
-  if (maxIn) {
-    const h=Math.floor((settings.waitForMusicMaxSecs||0)/3600), m=Math.floor(((settings.waitForMusicMaxSecs||0)%3600)/60);
-    document.getElementById('in-waitMusicMaxH').value=h;
-    document.getElementById('in-waitMusicMaxM').value=m;
+  const maxH = document.getElementById('in-waitMusicMaxH');
+  if (maxH) {
+    maxH.value = Math.floor((settings.waitForMusicMaxSecs||0)/3600);
+    document.getElementById('in-waitMusicMaxM').value = Math.floor(((settings.waitForMusicMaxSecs||0)%3600)/60);
   }
   renderThresholdList();
   renderQbPreview();
-  function fillHms(secs, prefix) {
-    const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60), s=secs%60;
-    const eh=document.getElementById(`in-${prefix}H`), em=document.getElementById(`in-${prefix}M`), es=document.getElementById(`in-${prefix}S`);
-    if(eh)eh.value=h; if(em)em.value=m; if(es)es.value=s;
-  }
-  fillHms(settings.addTimeAmount, 'add');
+  const s = settings.addTimeAmount||600;
+  const ah=document.getElementById('in-addH'), am=document.getElementById('in-addM'), as=document.getElementById('in-addS');
+  if(ah){ah.value=Math.floor(s/3600);am.value=Math.floor((s%3600)/60);as.value=s%60;}
   const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
-  const sc = { ...defaults, ...(settings.shortcuts || {}) };
+  const sc = { ...defaults, ...(settings.shortcuts||{}) };
   ['cancel','pause','toggle'].forEach(a => {
     const el = document.getElementById('sc-'+a);
     if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl','Ctrl');
@@ -1056,10 +1105,7 @@ function applySettings(){
 
 let _capturingShortcut = null;
 function startShortcutCapture(action) {
-  if (_capturingShortcut) {
-    document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing');
-    applySettings();
-  }
+  if (_capturingShortcut) { document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing'); applySettings(); }
   _capturingShortcut = action;
   const el = document.getElementById('sc-'+action);
   el.textContent = 'Appuie sur un raccourci…';
@@ -1067,46 +1113,35 @@ function startShortcutCapture(action) {
 }
 document.addEventListener('keydown', e => {
   if (!_capturingShortcut) return;
-  const ignoredKeys = ['Control','Alt','Shift','Meta','OS'];
-  if (e.key === 'Escape') {
-    document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing');
-    _capturingShortcut = null;
-    applySettings();
-    return;
-  }
-  if (ignoredKeys.includes(e.key)) return;
+  if (e.key === 'Escape') { document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing'); _capturingShortcut=null; applySettings(); return; }
+  if (['Control','Alt','Shift','Meta','OS'].includes(e.key)) return;
   e.preventDefault();
   const mods = [];
-  if (e.ctrlKey || e.metaKey) mods.push('CommandOrControl');
+  if (e.ctrlKey||e.metaKey) mods.push('CommandOrControl');
   if (e.altKey) mods.push('Alt');
   if (e.shiftKey) mods.push('Shift');
-  if (mods.length === 0) return;
-  const key = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+  if (!mods.length) return;
+  const key = e.key.length===1 ? e.key.toUpperCase() : e.key;
   const combo = [...mods, key].join('+');
   const action = _capturingShortcut;
   _capturingShortcut = null;
   document.getElementById('sc-'+action).classList.remove('capturing');
-  settings.shortcuts = { ...({ cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' }), ...(settings.shortcuts||{}), [action]: combo };
+  settings.shortcuts = { ...{ cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' }, ...(settings.shortcuts||{}), [action]: combo };
   ipc('save-settings', { shortcuts: settings.shortcuts });
   applySettings();
 });
 document.addEventListener('mousedown', e => {
   if (!_capturingShortcut) return;
-  if (!e.target.closest('.sc-badge')) {
-    document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing');
-    _capturingShortcut = null;
-    applySettings();
-  }
+  if (!e.target.closest('.sc-badge')) { document.getElementById('sc-'+_capturingShortcut).classList.remove('capturing'); _capturingShortcut=null; applySettings(); }
 });
 
-function secsToHms(s){return{h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60};}
-function hmsToSecs(h,m,s){return h*3600+m*60+s;}
+function secsToHms(s) { return {h:Math.floor(s/3600),m:Math.floor((s%3600)/60),s:s%60}; }
+function hmsToSecs(h,m,s) { return h*3600+m*60+s; }
 
 function renderThresholdList() {
-  const list = document.getElementById('notifThresholdList');
-  if (!list) return;
+  const list = document.getElementById('notifThresholdList'); if (!list) return;
   const thresholds = Array.isArray(settings.notifTimes) ? settings.notifTimes : [settings.notifTimes||300];
-  list.innerHTML = thresholds.map((secs, i) => {
+  list.innerHTML = thresholds.map((secs,i) => {
     const {h,m,s} = secsToHms(secs);
     return `<div style="display:flex;align-items:center;gap:6px;">
       <div class="hms-row">
@@ -1117,35 +1152,20 @@ function renderThresholdList() {
         <input class="hms-in" type="number" min="0" max="59" value="${String(s).padStart(2,'0')}" oninput="updateThreshold(${i},'s',this.value)">
       </div>
       <span style="font-size:11px;color:var(--text-3);margin-left:4px;">avant la fin</span>
-      ${thresholds.length > 1 ? `<button class="ic-btn red" onclick="removeThreshold(${i})" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+      ${thresholds.length>1?`<button class="ic-btn red" onclick="removeThreshold(${i})" style="margin-left:auto;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`:''}
     </div>`;
   }).join('');
 }
-
 function updateThreshold(i, unit, val) {
   const thresholds = [...(settings.notifTimes||[300])];
   const {h,m,s} = secsToHms(thresholds[i]||0);
-  const nh = unit==='h'?parseInt(val)||0:h;
-  const nm = unit==='m'?parseInt(val)||0:m;
-  const ns = unit==='s'?parseInt(val)||0:s;
+  const nh=unit==='h'?parseInt(val)||0:h, nm=unit==='m'?parseInt(val)||0:m, ns=unit==='s'?parseInt(val)||0:s;
   const total = hmsToSecs(nh,nm,ns);
-  if (total > 0) { thresholds[i]=total; settings.notifTimes=thresholds; ipc('save-settings',settings); }
+  if (total>0) { thresholds[i]=total; settings.notifTimes=thresholds; ipc('save-settings',settings); }
 }
-function addThreshold() {
-  const thresholds = [...(settings.notifTimes||[300])];
-  thresholds.push(60);
-  settings.notifTimes = thresholds;
-  ipc('save-settings', settings);
-  renderThresholdList();
-}
-function removeThreshold(i) {
-  const thresholds = [...(settings.notifTimes||[300])];
-  if (thresholds.length <= 1) return;
-  thresholds.splice(i, 1);
-  settings.notifTimes = thresholds;
-  ipc('save-settings', settings);
-  renderThresholdList();
-}
+function addThreshold() { const t=[...(settings.notifTimes||[300])]; t.push(60); settings.notifTimes=t; ipc('save-settings',settings); renderThresholdList(); }
+function removeThreshold(i) { const t=[...(settings.notifTimes||[300])]; if(t.length<=1)return; t.splice(i,1); settings.notifTimes=t; ipc('save-settings',settings); renderThresholdList(); }
+
 function saveHmsSetting(key, prefix) {
   const h=parseInt(document.getElementById(`in-${prefix}H`).value)||0;
   const m=parseInt(document.getElementById(`in-${prefix}M`).value)||0;
@@ -1153,39 +1173,31 @@ function saveHmsSetting(key, prefix) {
   const total=h*3600+m*60+s;
   if(total>0){settings[key]=total;ipc('save-settings',settings);}
 }
+
 let qbEditing = false;
 function toggleQbEdit() {
   qbEditing = !qbEditing;
-  const btn = document.getElementById('qbEditBtn');
-  const ico = document.getElementById('qbEditIcon');
-  const editor = document.getElementById('qbEditor');
-  const preview = document.getElementById('qbPreview');
+  const btn=document.getElementById('qbEditBtn'), ico=document.getElementById('qbEditIcon');
+  const editor=document.getElementById('qbEditor'), preview=document.getElementById('qbPreview');
   btn.style.color = qbEditing ? 'var(--accent)' : '';
   btn.title = qbEditing ? 'Sauvegarder' : 'Modifier';
   ico.innerHTML = qbEditing ? ICON_SAVE : ICON_PENCIL;
   editor.style.display = qbEditing ? 'flex' : 'none';
   preview.style.display = qbEditing ? 'none' : 'flex';
-  if (qbEditing) renderQbList();
-  else { saveQb(); renderQbPreview(); renderAllQuickBtns(); }
+  if (qbEditing) renderQbList(); else { saveQb(); renderQbPreview(); renderAllQuickBtns(); }
 }
 function renderQbPreview() {
-  const el = document.getElementById('qbPreview');
-  if (!el) return;
-  const btns = settings.quickTimeButtons || [];
-  el.innerHTML = btns.map(s => {
-    const pos = s > 0;
-    const lbl = (pos?'+':'−') + fmtDur(Math.abs(s));
-    return `<div class="add-btn" style="${pos?'':'color:var(--danger);border-color:rgba(239,91,110,.2);'}">${lbl}</div>`;
+  const el=document.getElementById('qbPreview'); if(!el)return;
+  el.innerHTML=(settings.quickTimeButtons||[]).map(s=>{
+    const pos=s>0;
+    return `<div class="add-btn" style="${pos?'':'color:var(--danger);border-color:rgba(239,91,110,.2);'}">${(pos?'+':'−')+fmtDur(Math.abs(s))}</div>`;
   }).join('');
 }
 function renderQbList() {
-  const list = document.getElementById('qbList');
-  if (!list) return;
-  const btns = settings.quickTimeButtons || [];
-  list.innerHTML = btns.map((secs, i) => {
-    const pos = secs >= 0;
-    const abs = Math.abs(secs);
-    const h=Math.floor(abs/3600), m=Math.floor((abs%3600)/60), s=abs%60;
+  const list=document.getElementById('qbList'); if(!list)return;
+  list.innerHTML=(settings.quickTimeButtons||[]).map((secs,i)=>{
+    const pos=secs>=0, abs=Math.abs(secs);
+    const h=Math.floor(abs/3600),m=Math.floor((abs%3600)/60),s=abs%60;
     return `<div style="display:flex;align-items:center;gap:6px;">
       <select class="hms-in" style="width:58px;font-size:12px;padding:4px 2px;" onchange="updateQbSign(${i},this.value)">
         <option value="1" ${pos?'selected':''}>+</option>
@@ -1202,56 +1214,40 @@ function renderQbList() {
     </div>`;
   }).join('');
 }
-function updateQbSign(i, sign) {
-  const btns = [...(settings.quickTimeButtons||[])];
-  btns[i] = Math.abs(btns[i]) * parseInt(sign);
-  settings.quickTimeButtons = btns;
+function updateQbSign(i,sign){const b=[...(settings.quickTimeButtons||[])];b[i]=Math.abs(b[i])*parseInt(sign);settings.quickTimeButtons=b;}
+function updateQbVal(i,unit,val){
+  const b=[...(settings.quickTimeButtons||[])],sign=b[i]<0?-1:1,abs=Math.abs(b[i]||0);
+  const h=Math.floor(abs/3600),m=Math.floor((abs%3600)/60),s=abs%60;
+  const nh=unit==='h'?parseInt(val)||0:h,nm=unit==='m'?parseInt(val)||0:m,ns=unit==='s'?parseInt(val)||0:s;
+  const total=nh*3600+nm*60+ns;
+  if(total>0)b[i]=sign*total;
+  settings.quickTimeButtons=b;
 }
-function updateQbVal(i, unit, val) {
-  const btns = [...(settings.quickTimeButtons||[])];
-  const sign = btns[i] < 0 ? -1 : 1;
-  const abs = Math.abs(btns[i]||0);
-  const h=Math.floor(abs/3600), m=Math.floor((abs%3600)/60), s=abs%60;
-  const nh=unit==='h'?parseInt(val)||0:h;
-  const nm=unit==='m'?parseInt(val)||0:m;
-  const ns=unit==='s'?parseInt(val)||0:s;
-  const total = nh*3600+nm*60+ns;
-  if (total > 0) btns[i] = sign * total;
-  settings.quickTimeButtons = btns;
-}
-function addQbBtn() {
-  const btns = [...(settings.quickTimeButtons||[])]; btns.push(300);
-  settings.quickTimeButtons = btns; renderQbList();
-}
-function removeQbBtn(i) {
-  const btns = [...(settings.quickTimeButtons||[])]; btns.splice(i,1);
-  settings.quickTimeButtons = btns; renderQbList();
-}
-function saveQb() { ipc('save-settings', settings); }
-function renderAllQuickBtns() {
-  Object.keys(activeTimers).forEach(id => renderQuickBtns(id));
-}
+function addQbBtn(){const b=[...(settings.quickTimeButtons||[])];b.push(300);settings.quickTimeButtons=b;renderQbList();}
+function removeQbBtn(i){const b=[...(settings.quickTimeButtons||[])];b.splice(i,1);settings.quickTimeButtons=b;renderQbList();}
+function saveQb(){ipc('save-settings',settings);}
+function renderAllQuickBtns(){Object.keys(activeTimers).forEach(id=>renderQuickBtns(id));}
 
 function saveWaitMusicMax() {
-  const h = parseInt(document.getElementById('in-waitMusicMaxH').value)||0;
-  const m = parseInt(document.getElementById('in-waitMusicMaxM').value)||0;
-  settings.waitForMusicMaxSecs = h*3600 + m*60;
-  ipc('save-settings', settings);
+  const h=parseInt(document.getElementById('in-waitMusicMaxH').value)||0;
+  const m=parseInt(document.getElementById('in-waitMusicMaxM').value)||0;
+  settings.waitForMusicMaxSecs=h*3600+m*60;
+  ipc('save-settings',settings);
 }
 function togSet(key,tglId){settings[key]=!settings[key];ipc('save-settings',settings);applySettings();}
 
-ipcRenderer.on('timer-waiting-music', (e, {id}) => {
-  if (!activeTimers[id]) return;
-  activeTimers[id].waitingMusic = true;
-  renderTimerCards(); updateStatus();
-  notif('info', 'Timer terminé — en attente de la fin de la musique…');
+ipcRenderer.on('timer-waiting-music',(e,{id})=>{
+  if(!activeTimers[id])return;
+  activeTimers[id].waitingMusic=true;
+  renderTimerCards();updateStatus();
+  notif('info','Timer terminé — en attente de la fin de la musique…');
 });
-ipcRenderer.on('timer-music-status', (e, {id, playing, elapsed, maxSecs}) => {
-  const el = document.getElementById(`tc-music-${id}`);
-  if (!el) return;
-  const elStr = fmtHMS(elapsed);
-  const maxStr = maxSecs > 0 ? ` / max ${fmtHMS(maxSecs)}` : '';
-  el.textContent = `🎵 Attente fin musique… ${elStr}${maxStr}`;
+ipcRenderer.on('timer-music-status',(e,{id,playing,elapsed,maxSecs})=>{
+  const el=document.getElementById(`tc-music-${id}`);
+  if(!el)return;
+  const elStr=fmtHMS(elapsed);
+  const maxStr=maxSecs>0?` / max ${fmtHMS(maxSecs)}`:'';
+  el.textContent=`🎵 Attente fin musique… ${elStr}${maxStr}`;
 });
 
 function fmtHMS(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
@@ -1265,6 +1261,7 @@ function notif(type,msg){
   d.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="${ic.color}" stroke-linecap="round" stroke-linejoin="round">${ic.path}</svg><span>${msg}</span>`;
   s.appendChild(d);setTimeout(()=>d.remove(),4000);
 }
+
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
 </script>
 </body>
