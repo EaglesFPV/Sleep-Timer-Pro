@@ -52,29 +52,53 @@ function saveActions() { try { fs.writeFileSync(DATA_FILE, JSON.stringify(action
 function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); } catch(e) {} }
 
 function isMusicPlaying() {
+  // Utilise un script C# compilé à la volée via PowerShell pour appeler WinRT de façon synchrone
   const psScript = `
-Add-Type -AssemblyName System.Runtime.WindowsRuntime
-$null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-$Playing = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing
-try {
-  $mgr = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync().GetAwaiter().GetResult()
-  $sessions = $mgr.GetSessions()
-  foreach ($session in $sessions) {
-    $info = $session.GetPlaybackInfo()
-    if ($info.PlaybackStatus -eq $Playing) { exit 0 }
+$code = @"
+using System;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.Media.Control;
+public class MusicChecker {
+  public static bool IsPlaying() {
+    try {
+      var mgr = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().AsTask().GetAwaiter().GetResult();
+      var sessions = mgr.GetSessions();
+      foreach (var s in sessions) {
+        var info = s.GetPlaybackInfo();
+        if (info.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) return true;
+      }
+    } catch {}
+    return false;
   }
-} catch { exit 1 }
-exit 1
+}
+"@
+Add-Type -TypeDefinition $code -Language CSharp -ReferencedAssemblies @(
+  [System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeBuffer].Assembly.Location,
+  (Join-Path ([System.Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) "WinRT.Runtime.dll")
+) -ErrorAction SilentlyContinue 2>$null
+if ([MusicChecker]::IsPlaying()) { exit 0 } else { exit 1 }
 `;
   const tmpFile = path.join(app.getPath('temp'), 'stp_music_check.ps1');
   try {
     fs.writeFileSync(tmpFile, psScript, 'utf8');
-    execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`, { timeout: 5000, windowsHide: true });
+    execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`, { timeout: 8000, windowsHide: true });
     log('isMusicPlaying: TRUE');
     return true;
   } catch(e) {
-    log('isMusicPlaying: FALSE — ' + e.message);
-    return false;
+    // Fallback : chercher des processus audio connus actifs
+    try {
+      const result = execSync(
+        `powershell -NoProfile -NonInteractive -Command "Get-Process | Where-Object {$_.Name -match 'chrome|msedge|firefox|Spotify|vlc|wmplayer|groove|musicbee|foobar'} | Select-Object -First 1 -ExpandProperty Name"`,
+        { timeout: 3000, windowsHide: true }
+      ).toString().trim();
+      const found = result.length > 0;
+      log(`isMusicPlaying fallback: ${found ? 'TRUE — ' + result : 'FALSE'}`);
+      return found;
+    } catch(e2) {
+      log('isMusicPlaying: FALSE — ' + e2.message);
+      return false;
+    }
   }
 }
 
