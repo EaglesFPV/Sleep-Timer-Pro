@@ -51,28 +51,37 @@ function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString
 function getMusicState() {
   const psScript = `
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$asTaskGeneric = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation`1' })[0]
+function Await($WinRtTask, $ResultType) {
+  $asTaskSpecific = $asTaskGeneric.MakeGenericMethod($ResultType)
+  $netTask = $asTaskSpecific.Invoke($null, @($WinRtTask))
+  $netTask.Wait(-1) | Out-Null
+  $netTask.Result
+}
 $null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-function Await($WinRtTask) { $WinRtTask.AsTask().GetAwaiter().GetResult() }
+$null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSession,Windows.Media.Control,ContentType=WindowsRuntime]
 try {
-  $mgr = Await([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync())
+  $mgr = Await([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
   $sessions = $mgr.GetSessions()
-  $count = 0
+  $found = $false
   foreach ($s in $sessions) {
-    $count++
     $info = $s.GetPlaybackInfo()
-    $status = $info.PlaybackStatus
-    try {
-      $media = Await($s.TryGetMediaPropertiesAsync())
-      $title = $media.Title
-      $artist = $media.Artist
-    } catch { $title = ""; $artist = "" }
-    Write-Output "SESSION:$count STATUS:$status TITLE:$title ARTIST:$artist"
-    if ($status -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) {
-      Write-Output "PLAYING:True"
-      Write-Output "TRACK:$title|||$artist"
+    $status = $info.PlaybackStatus.ToString()
+    Write-Output "SESSION: STATUS=$status"
+    if ($status -eq 'Playing') {
+      $found = $true
+      try {
+        $media = Await($s.TryGetMediaPropertiesAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties])
+        Write-Output "PLAYING:True"
+        Write-Output "TRACK:$($media.Title)|||$($media.Artist)"
+      } catch {
+        Write-Output "PLAYING:True"
+        Write-Output "TRACK:"
+      }
+      break
     }
   }
-  if ($count -eq 0) { Write-Output "PLAYING:False"; Write-Output "TRACK:" }
+  if (-not $found) { Write-Output "PLAYING:False"; Write-Output "TRACK:" }
 } catch {
   Write-Output "ERROR:$($_.Exception.Message)"
   Write-Output "PLAYING:False"
