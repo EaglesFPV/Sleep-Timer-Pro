@@ -101,6 +101,11 @@ exit 0
   } catch(e) {
     log(`getMusicState PS ERROR: ${e.message}`);
     try {
+      const allProcs = execSync(
+        `powershell -NoProfile -NonInteractive -Command "Get-Process | Select-Object -ExpandProperty Name | Sort-Object -Unique"`,
+        { timeout: 3000, windowsHide: true }
+      ).toString().trim();
+      log(`getMusicState ALL PROCS: ${allProcs.replace(/\n/g, ', ')}`);
       const result = execSync(
         `powershell -NoProfile -NonInteractive -Command "Get-Process | Where-Object {$_.Name -match 'chrome|msedge|firefox|Spotify|vlc|wmplayer'} | Select-Object -First 1 -ExpandProperty Name"`,
         { timeout: 3000, windowsHide: true }
