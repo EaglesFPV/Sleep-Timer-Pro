@@ -52,12 +52,14 @@ function isMusicPlaying() {
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
 $mgr = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync().GetAwaiter().GetResult()
-$session = $mgr.GetCurrentSession()
-if ($null -eq $session) { exit 1 }
-$info = $session.GetPlaybackInfo()
-if ($info.PlaybackStatus -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) { exit 0 } else { exit 1 }
+$sessions = $mgr.GetSessions()
+foreach ($session in $sessions) {
+  $info = $session.GetPlaybackInfo()
+  if ($info.PlaybackStatus -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) { exit 0 }
+}
+exit 1
 `;
-    execSync(`powershell -NoProfile -NonInteractive -Command "${ps.replace(/\n/g,' ')}"`, { timeout: 3000, windowsHide: true });
+    execSync(`powershell -NoProfile -NonInteractive -Command "${ps.replace(/\n/g,' ')}"`, { timeout: 5000, windowsHide: true });
     return true;
   } catch(e) {
     return false;
@@ -186,7 +188,11 @@ function startTimer(id, seconds, actionData) {
     type: actionData.type,
     paused: false,
     waitingMusic: false,
-    notifSentSet: new Set(),
+    // Pré-remplir les seuils déjà dépassés dès le démarrage (évite les notifs immédiates)
+    notifSentSet: new Set(
+      (Array.isArray(settings.notifTimes) ? settings.notifTimes : [settings.notifTimes || 300])
+        .filter(threshold => threshold >= seconds)
+    ),
     interval: null
   };
 
