@@ -50,40 +50,34 @@ function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString
 
 function getMusicState() {
   const psScript = `
-$code = @"
-using System;
-using System.Threading.Tasks;
-using Windows.Media.Control;
-public class MusicChecker {
-  public static bool IsPlaying() {
+Add-Type -AssemblyName System.Runtime.WindowsRuntime
+$null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
+function Await($WinRtTask) { $WinRtTask.AsTask().GetAwaiter().GetResult() }
+try {
+  $mgr = Await([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync())
+  $sessions = $mgr.GetSessions()
+  $count = 0
+  foreach ($s in $sessions) {
+    $count++
+    $info = $s.GetPlaybackInfo()
+    $status = $info.PlaybackStatus
     try {
-      var mgr = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().AsTask().GetAwaiter().GetResult();
-      foreach (var s in mgr.GetSessions()) {
-        if (s.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) return true;
-      }
-    } catch {}
-    return false;
+      $media = Await($s.TryGetMediaPropertiesAsync())
+      $title = $media.Title
+      $artist = $media.Artist
+    } catch { $title = ""; $artist = "" }
+    Write-Output "SESSION:$count STATUS:$status TITLE:$title ARTIST:$artist"
+    if ($status -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) {
+      Write-Output "PLAYING:True"
+      Write-Output "TRACK:$title|||$artist"
+    }
   }
-  public static string GetTrack() {
-    try {
-      var mgr = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().AsTask().GetAwaiter().GetResult();
-      foreach (var s in mgr.GetSessions()) {
-        if (s.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) {
-          var m = s.TryGetMediaPropertiesAsync().AsTask().GetAwaiter().GetResult();
-          return m.Title + "|||" + m.Artist;
-        }
-      }
-    } catch {}
-    return "";
-  }
+  if ($count -eq 0) { Write-Output "PLAYING:False"; Write-Output "TRACK:" }
+} catch {
+  Write-Output "ERROR:$($_.Exception.Message)"
+  Write-Output "PLAYING:False"
+  Write-Output "TRACK:"
 }
-"@
-Add-Type -TypeDefinition $code -Language CSharp -ReferencedAssemblies @(
-  [System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeBuffer].Assembly.Location,
-  (Join-Path ([System.Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory()) "WinRT.Runtime.dll")
-) -ErrorAction SilentlyContinue 2>$null
-Write-Output "PLAYING:$([MusicChecker]::IsPlaying())"
-Write-Output "TRACK:$([MusicChecker]::GetTrack())"
 exit 0
 `;
   const tmpFile = path.join(app.getPath('temp'), 'stp_music_check.ps1');
@@ -93,6 +87,7 @@ exit 0
       `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`,
       { timeout: 8000, windowsHide: true }
     ).toString();
+    log(`getMusicState RAW OUTPUT: "${out.replace(/\n/g,'|')}"`);
     const playing    = out.includes('PLAYING:True');
     const trackMatch = out.match(/TRACK:(.*)/);
     const track      = trackMatch ? trackMatch[1].trim() : '';
