@@ -45,6 +45,9 @@ function loadData() {
 function saveActions()  { try { fs.writeFileSync(DATA_FILE,     JSON.stringify(actionsData, null, 2)); } catch {} }
 function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings,    null, 2)); } catch {} }
 
+const LOG_FILE = path.join(app.getPath("userData"), "debug.log");
+function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
+
 function getMusicState() {
   const psScript = `
 $code = @"
@@ -93,15 +96,20 @@ exit 0
     const playing    = out.includes('PLAYING:True');
     const trackMatch = out.match(/TRACK:(.*)/);
     const track      = trackMatch ? trackMatch[1].trim() : '';
+    log(`getMusicState: playing=${playing} track="${track}"`);
     return { playing, track };
-  } catch {
+  } catch(e) {
+    log(`getMusicState PS ERROR: ${e.message}`);
     try {
       const result = execSync(
         `powershell -NoProfile -NonInteractive -Command "Get-Process | Where-Object {$_.Name -match 'chrome|msedge|firefox|Spotify|vlc|wmplayer'} | Select-Object -First 1 -ExpandProperty Name"`,
         { timeout: 3000, windowsHide: true }
       ).toString().trim();
-      return { playing: result.length > 0, track: result };
-    } catch {
+      const r = { playing: result.length > 0, track: result };
+      log(`getMusicState fallback: playing=${r.playing} proc="${result}"`);
+      return r;
+    } catch(e2) {
+      log(`getMusicState FALLBACK ERROR: ${e2.message}`);
       return { playing: false, track: '' };
     }
   }
@@ -176,6 +184,7 @@ function startMusicWait(id, actionData) {
 
   const initial   = getMusicState();
   t.initialTrack  = initial.track;
+  log(`startMusicWait démarré — initialTrack="${t.initialTrack}"`);
 
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-waiting-music', { id });
   updateTrayMenu();
@@ -203,8 +212,10 @@ function startMusicWait(id, actionData) {
 
     const paused       = !state.playing;
     const trackChanged = t.initialTrack !== undefined && state.track !== t.initialTrack;
+    log(`musicWait check — playing=${state.playing} paused=${paused} track="${state.track}" initialTrack="${t.initialTrack}" trackChanged=${trackChanged}`);
 
     if (paused || trackChanged) {
+      log(`startMusicWait: DÉCLENCHEMENT paused=${paused} trackChanged=${trackChanged}`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
     }
@@ -266,7 +277,10 @@ function startTimer(id, seconds, actionData) {
     if (t.remaining <= 0) {
       clearInterval(t.interval);
       const shouldWait = actionData.waitForMusic !== undefined ? actionData.waitForMusic : settings.waitForMusic;
-      if (shouldWait && getMusicState().playing) {
+      log(`Timer ${id} fini — shouldWait=${shouldWait} actionData.waitForMusic=${actionData.waitForMusic} settings.waitForMusic=${settings.waitForMusic}`);
+      const musicState = getMusicState();
+      log(`getMusicState au finish: playing=${musicState.playing} track="${musicState.track}"`);
+      if (shouldWait && musicState.playing) {
         startMusicWait(id, actionData);
       } else {
         finishTimer(id, actionData);
