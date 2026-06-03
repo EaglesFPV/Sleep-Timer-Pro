@@ -6,6 +6,11 @@ const fs = require('fs');
 let mainWindow;
 let tray;
 
+const LOG_FILE = path.join(app.getPath('userData'), 'debug.log');
+function log(msg) {
+  try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch(e) {}
+}
+
 let timers = {};
 let nextTimerId = 1;
 
@@ -65,8 +70,10 @@ exit 1
   try {
     fs.writeFileSync(tmpFile, psScript, 'utf8');
     execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`, { timeout: 5000, windowsHide: true });
+    log('isMusicPlaying: TRUE');
     return true;
   } catch(e) {
+    log('isMusicPlaying: FALSE — ' + e.message);
     return false;
   }
 }
@@ -163,6 +170,8 @@ function startMusicWait(id, actionData) {
       clearInterval(t.musicInterval);
       delete timers[id];
       updateTrayMenu();
+      updateWindowTitle();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', id);
       executeAction(actionData.type, id);
       return;
     }
@@ -176,6 +185,8 @@ function startMusicWait(id, actionData) {
       clearInterval(t.musicInterval);
       delete timers[id];
       updateTrayMenu();
+      updateWindowTitle();
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', id);
       executeAction(actionData.type, id);
     }
   }, 5000);
@@ -230,11 +241,15 @@ function startTimer(id, seconds, actionData) {
 
     if (t.remaining <= 0) {
       clearInterval(t.interval);
-      if (settings.waitForMusic && isMusicPlaying()) {
+      const shouldWait = (actionData.waitForMusic !== undefined ? actionData.waitForMusic : settings.waitForMusic);
+      log(`Timer ${id} fini — shouldWait=${shouldWait}, settings.waitForMusic=${settings.waitForMusic}, action.waitForMusic=${actionData.waitForMusic}`);
+      if (shouldWait && isMusicPlaying()) {
         startMusicWait(id, actionData);
       } else {
         delete timers[id];
         updateTrayMenu();
+        updateWindowTitle();
+        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', id);
         executeAction(actionData.type, id);
       }
     }
