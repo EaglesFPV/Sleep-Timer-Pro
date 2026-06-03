@@ -47,19 +47,24 @@ function saveActions() { try { fs.writeFileSync(DATA_FILE, JSON.stringify(action
 function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); } catch(e) {} }
 
 function isMusicPlaying() {
-  try {
-    const ps = `
+  const psScript = `
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $null = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]
-$mgr = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync().GetAwaiter().GetResult()
-$sessions = $mgr.GetSessions()
-foreach ($session in $sessions) {
-  $info = $session.GetPlaybackInfo()
-  if ($info.PlaybackStatus -eq [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing) { exit 0 }
-}
+$Playing = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionPlaybackStatus]::Playing
+try {
+  $mgr = [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync().GetAwaiter().GetResult()
+  $sessions = $mgr.GetSessions()
+  foreach ($session in $sessions) {
+    $info = $session.GetPlaybackInfo()
+    if ($info.PlaybackStatus -eq $Playing) { exit 0 }
+  }
+} catch { exit 1 }
 exit 1
 `;
-    execSync(`powershell -NoProfile -NonInteractive -Command "${ps.replace(/\n/g,' ')}"`, { timeout: 5000, windowsHide: true });
+  const tmpFile = path.join(app.getPath('temp'), 'stp_music_check.ps1');
+  try {
+    fs.writeFileSync(tmpFile, psScript, 'utf8');
+    execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`, { timeout: 5000, windowsHide: true });
     return true;
   } catch(e) {
     return false;
