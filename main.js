@@ -8,7 +8,7 @@ let tray;
 let timers = {};
 let nextTimerId = 1;
 
-const DATA_FILE     = path.join(app.getPath('userData'), 'actions_v1.json');
+const DATA_FILE = path.join(app.getPath('userData'), 'actions_v1.json');
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings_v1.json');
 
 let actionsData = [];
@@ -24,29 +24,22 @@ let settings = {
   shortcuts: {
     cancel: 'CommandOrControl+Alt+S',
     pause:  'CommandOrControl+Alt+P',
-    toggle: 'CommandOrControl+Alt+O',
-  },
+    toggle: 'CommandOrControl+Alt+O'
+  }
 };
 
 function loadData() {
   try {
-    actionsData = fs.existsSync(DATA_FILE)
-      ? JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
-      : [];
-    if (!fs.existsSync(DATA_FILE)) saveActions();
+    if (fs.existsSync(DATA_FILE)) actionsData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    else { actionsData = []; saveActions(); }
   } catch { actionsData = []; }
   try {
-    if (fs.existsSync(SETTINGS_FILE)) {
-      settings = { ...settings, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) };
-    }
+    if (fs.existsSync(SETTINGS_FILE)) settings = { ...settings, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) };
   } catch {}
 }
 
-function saveActions()  { try { fs.writeFileSync(DATA_FILE,     JSON.stringify(actionsData, null, 2)); } catch {} }
-function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings,    null, 2)); } catch {} }
-
-const LOG_FILE = path.join(app.getPath("userData"), "debug.log");
-function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
+function saveActions() { try { fs.writeFileSync(DATA_FILE, JSON.stringify(actionsData, null, 2)); } catch {} }
+function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); } catch {} }
 
 function getMusicState() {
   const psScript = `
@@ -67,7 +60,6 @@ try {
   foreach ($s in $sessions) {
     $info = $s.GetPlaybackInfo()
     $status = $info.PlaybackStatus.ToString()
-    Write-Output "SESSION: STATUS=$status"
     if ($status -eq 'Playing') {
       $found = $true
       try {
@@ -83,7 +75,6 @@ try {
   }
   if (-not $found) { Write-Output "PLAYING:False"; Write-Output "TRACK:" }
 } catch {
-  Write-Output "ERROR:$($_.Exception.Message)"
   Write-Output "PLAYING:False"
   Write-Output "TRACK:"
 }
@@ -96,31 +87,12 @@ exit 0
       `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`,
       { timeout: 8000, windowsHide: true }
     ).toString();
-    log(`getMusicState RAW OUTPUT: "${out.replace(/\n/g,'|')}"`);
     const playing    = out.includes('PLAYING:True');
     const trackMatch = out.match(/TRACK:(.*)/);
     const track      = trackMatch ? trackMatch[1].trim() : '';
-    log(`getMusicState: playing=${playing} track="${track}"`);
     return { playing, track };
-  } catch(e) {
-    log(`getMusicState PS ERROR: ${e.message}`);
-    try {
-      const allProcs = execSync(
-        `powershell -NoProfile -NonInteractive -Command "Get-Process | Select-Object -ExpandProperty Name | Sort-Object -Unique"`,
-        { timeout: 3000, windowsHide: true }
-      ).toString().trim();
-      log(`getMusicState ALL PROCS: ${allProcs.replace(/\n/g, ', ')}`);
-      const result = execSync(
-        `powershell -NoProfile -NonInteractive -Command "Get-Process | Where-Object {$_.Name -match 'chrome|msedge|firefox|Spotify|vlc|wmplayer'} | Select-Object -First 1 -ExpandProperty Name"`,
-        { timeout: 3000, windowsHide: true }
-      ).toString().trim();
-      const r = { playing: result.length > 0, track: result };
-      log(`getMusicState fallback: playing=${r.playing} proc="${result}"`);
-      return r;
-    } catch(e2) {
-      log(`getMusicState FALLBACK ERROR: ${e2.message}`);
-      return { playing: false, track: '' };
-    }
+  } catch {
+    return { playing: false, track: '' };
   }
 }
 
@@ -134,11 +106,11 @@ function createWindow() {
     backgroundColor: '#060A14',
     icon: path.join(__dirname, 'assets', 'icon.ico'),
     webPreferences: { nodeIntegration: true, contextIsolation: false },
-    show: false,
+    show: false
   });
   mainWindow.loadFile('index.html');
   mainWindow.once('ready-to-show', () => mainWindow.show());
-  mainWindow.on('close', (e) => {
+  mainWindow.on('close', e => {
     if (settings.minimizeToTray && Object.keys(timers).length > 0) {
       e.preventDefault();
       mainWindow.hide();
@@ -159,72 +131,56 @@ function createTray() {
 function updateWindowTitle() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   const ids = Object.keys(timers);
-  mainWindow.setTitle(
-    ids.length === 0
-      ? 'SleepTimer Pro'
-      : `SleepTimer Pro — ${formatTime(timers[ids[0]].remaining)} · ${getTypeName(timers[ids[0]].type)}`
+  mainWindow.setTitle(ids.length
+    ? `SleepTimer Pro — ${formatTime(timers[ids[0]].remaining)} · ${getTypeName(timers[ids[0]].type)}`
+    : 'SleepTimer Pro'
   );
 }
 
 function updateTrayMenu() {
-  const active = Object.values(timers);
-  const items  = active.length === 0
+  const activeTimers = Object.values(timers);
+  const timerItems = activeTimers.length === 0
     ? [{ label: 'Aucun timer actif', enabled: false }]
-    : active.map(t => ({
+    : activeTimers.map(t => ({
         label: `${t.actionName} — ${t.waitingMusic ? 'Attente fin musique…' : formatTime(t.remaining)}`,
-        enabled: false,
+        enabled: false
       }));
-  tray.setContextMenu(Menu.buildFromTemplate([
-    ...items,
+  const menu = Menu.buildFromTemplate([
+    ...timerItems,
     { type: 'separator' },
-    { label: 'Ouvrir',       click: () => { mainWindow.show(); mainWindow.focus(); } },
-    { label: 'Tout annuler', enabled: active.length > 0, click: () => cancelAllTimers() },
+    { label: 'Ouvrir', click: () => { mainWindow.show(); mainWindow.focus(); } },
+    { label: 'Tout annuler', enabled: activeTimers.length > 0, click: () => cancelAllTimers() },
     { type: 'separator' },
-    { label: 'Quitter', click: () => { Object.keys(timers).forEach(id => clearInterval(timers[id].interval)); app.quit(); } },
-  ]));
+    { label: 'Quitter', click: () => { Object.keys(timers).forEach(id => clearInterval(timers[id].interval)); app.quit(); } }
+  ]);
+  tray.setContextMenu(menu);
 }
 
 function startMusicWait(id, actionData) {
   const t = timers[id];
   if (!t) return;
-
-  t.waitingMusic  = true;
+  t.waitingMusic = true;
   t.musicWaitStart = Date.now();
-
-  const initial   = getMusicState();
-  t.initialTrack  = initial.track;
-  log(`startMusicWait démarré — initialTrack="${t.initialTrack}"`);
-
+  const initialState = getMusicState();
+  t.initialTrack = initialState.track;
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-waiting-music', { id });
   updateTrayMenu();
-
   const maxMs = settings.waitForMusicMaxSecs > 0 ? settings.waitForMusicMaxSecs * 1000 : null;
-
   t.musicInterval = setInterval(() => {
     if (!timers[id]) { clearInterval(t.musicInterval); return; }
-
     const elapsed = Date.now() - t.musicWaitStart;
-
     if (maxMs && elapsed >= maxMs) {
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
       return;
     }
-
     const state = getMusicState();
-
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('timer-music-status', {
-        id, playing: state.playing, elapsed: Math.floor(elapsed / 1000), maxSecs: settings.waitForMusicMaxSecs || 0,
-      });
+      mainWindow.webContents.send('timer-music-status', { id, playing: state.playing, elapsed: Math.floor(elapsed / 1000), maxSecs: settings.waitForMusicMaxSecs || 0 });
     }
-
-    const paused       = !state.playing;
-    const trackChanged = t.initialTrack !== undefined && state.track !== t.initialTrack;
-    log(`musicWait check — playing=${state.playing} paused=${paused} track="${state.track}" initialTrack="${t.initialTrack}" trackChanged=${trackChanged}`);
-
-    if (paused || trackChanged) {
-      log(`startMusicWait: DÉCLENCHEMENT paused=${paused} trackChanged=${trackChanged}`);
+    const noSession = !state.playing && state.track === '';
+    const paused    = !state.playing && state.track !== '';
+    if (paused || noSession) {
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
     }
@@ -241,33 +197,27 @@ function finishTimer(id, actionData) {
 
 function startTimer(id, seconds, actionData) {
   if (timers[id]) clearInterval(timers[id].interval);
-
   const thresholds = Array.isArray(settings.notifTimes) ? settings.notifTimes : [settings.notifTimes || 300];
-
   timers[id] = {
     id,
-    remaining:    seconds,
-    total:        seconds,
-    actionName:   actionData.actionName,
-    actionIcon:   actionData.actionIcon,
-    type:         actionData.type,
-    paused:       false,
+    remaining: seconds,
+    total: seconds,
+    actionName: actionData.actionName,
+    actionIcon: actionData.actionIcon,
+    type: actionData.type,
+    paused: false,
     waitingMusic: false,
     notifSentSet: new Set(thresholds.filter(t => t >= seconds)),
-    interval:     null,
+    interval: null
   };
-
   let lastTick = Date.now();
-
   timers[id].interval = setInterval(() => {
     const t = timers[id];
     if (!t || t.paused) { lastTick = Date.now(); return; }
-
     const now   = Date.now();
     const delta = Math.min(Math.round((now - lastTick) / 1000), 60);
-    lastTick    = now;
+    lastTick = now;
     t.remaining = Math.max(0, t.remaining - delta);
-
     if (settings.notifEnabled) {
       thresholds.forEach(threshold => {
         if (t.remaining <= threshold && !t.notifSentSet.has(threshold)) {
@@ -276,27 +226,18 @@ function startTimer(id, seconds, actionData) {
         }
       });
     }
-
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('timer-tick', { id, remaining: t.remaining, total: t.total });
     }
     updateTrayMenu();
     updateWindowTitle();
-
     if (t.remaining <= 0) {
       clearInterval(t.interval);
       const shouldWait = actionData.waitForMusic !== undefined ? actionData.waitForMusic : settings.waitForMusic;
-      log(`Timer ${id} fini — shouldWait=${shouldWait} actionData.waitForMusic=${actionData.waitForMusic} settings.waitForMusic=${settings.waitForMusic}`);
-      const musicState = getMusicState();
-      log(`getMusicState au finish: playing=${musicState.playing} track="${musicState.track}"`);
-      if (shouldWait && musicState.playing) {
-        startMusicWait(id, actionData);
-      } else {
-        finishTimer(id, actionData);
-      }
+      if (shouldWait && getMusicState().playing) startMusicWait(id, actionData);
+      else finishTimer(id, actionData);
     }
   }, 1000);
-
   updateTrayMenu();
 }
 
@@ -304,17 +245,19 @@ function sendWindowsNotification(timerId, t, threshold) {
   if (!Notification.isSupported()) return;
   const notif = new Notification({
     title: `SleepTimer Pro — ${t.actionName}`,
-    body:  `${getTypeName(t.type)} dans ${formatTime(threshold)}. Cliquez pour ajouter ${formatTime(settings.addTimeAmount)}.`,
-    icon:  path.join(__dirname, 'assets', 'icon.ico'),
-    timeoutType: 'never',
+    body: `${getTypeName(t.type)} dans ${formatTime(threshold)}. Cliquez pour ajouter ${formatTime(settings.addTimeAmount)}.`,
+    icon: path.join(__dirname, 'assets', 'icon.ico'),
+    timeoutType: 'never'
   });
   notif.on('click', () => {
     if (!timers[timerId]) return;
     timers[timerId].remaining += settings.addTimeAmount;
     timers[timerId].total     += settings.addTimeAmount;
     timers[timerId].notifSentSet = new Set([...timers[timerId].notifSentSet].filter(s => s < timers[timerId].remaining));
-    mainWindow.webContents.send('timer-tick',  { id: timerId, remaining: timers[timerId].remaining, total: timers[timerId].total });
-    mainWindow.webContents.send('time-added',  { id: timerId, added: settings.addTimeAmount });
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('timer-tick', { id: timerId, remaining: timers[timerId].remaining, total: timers[timerId].total });
+      mainWindow.webContents.send('time-added', { id: timerId, added: settings.addTimeAmount });
+    }
   });
   notif.show();
 }
@@ -327,14 +270,14 @@ function cancelTimer(id) {
   }
   updateTrayMenu();
   updateWindowTitle();
-  mainWindow.webContents.send('timer-cancelled', id);
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', id);
 }
 
 function cancelAllTimers() {
   Object.keys(timers).forEach(id => {
     clearInterval(timers[id].interval);
     if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
-    mainWindow.webContents.send('timer-cancelled', parseInt(id));
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', parseInt(id));
   });
   timers = {};
   updateTrayMenu();
@@ -343,26 +286,21 @@ function cancelAllTimers() {
 
 function executeAction(type, timerId) {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('action-executing', { type, timerId });
-
   const commands = {
-    shutdown:  ['shutdown',     ['/s', '/t', '3']],
-    restart:   ['shutdown',     ['/r', '/t', '3']],
+    shutdown:  ['shutdown', ['/s', '/t', '3']],
+    restart:   ['shutdown', ['/r', '/t', '3']],
     sleep:     ['rundll32.exe', ['powrprof.dll,SetSuspendState', '0', '1', '0']],
-    hibernate: ['shutdown',     ['/h']],
+    hibernate: ['shutdown', ['/h']],
     lock:      ['rundll32.exe', ['user32.dll,LockWorkStation']],
-    logoff:    ['shutdown',     ['/l']],
+    logoff:    ['shutdown', ['/l']],
   };
-
-  const [cmd, args] = commands[type] || commands.sleep;
-
+  const cmdArgs = commands[type] || commands.sleep;
   setTimeout(() => {
     try {
-      const child = spawn(cmd, args, { detached: true, stdio: 'ignore', windowsHide: true });
+      const child = spawn(cmdArgs[0], cmdArgs[1], { detached: true, stdio: 'ignore', windowsHide: true });
       child.unref();
       if (type === 'lock' || type === 'logoff') {
-        setTimeout(() => {
-          if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('action-done');
-        }, 1500);
+        setTimeout(() => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('action-done'); }, 1500);
       }
     } catch (err) {
       if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('action-error', err.message);
@@ -383,45 +321,9 @@ function getTypeName(type) {
   return { sleep: 'Veille', shutdown: 'Extinction', restart: 'Redémarrage', hibernate: 'Hibernation', lock: 'Verrouillage', logoff: 'Déconnexion' }[type] || type;
 }
 
-function registerShortcuts() {
-  globalShortcut.unregisterAll();
-  const sc = {
-    cancel: 'CommandOrControl+Alt+S',
-    pause:  'CommandOrControl+Alt+P',
-    toggle: 'CommandOrControl+Alt+O',
-    ...(settings.shortcuts || {}),
-  };
-
-  globalShortcut.register(sc.cancel, () => {
-    if (Object.keys(timers).length > 0) {
-      cancelAllTimers();
-      Object.keys(timers).forEach(id => {
-        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', parseInt(id));
-      });
-    } else {
-      if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
-    }
-  });
-
-  globalShortcut.register(sc.pause, () => {
-    const ids = Object.keys(timers);
-    if (ids.length === 0) return;
-    const id = parseInt(ids[0]);
-    timers[id].paused = !timers[id].paused;
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('shortcut-pause', { id, paused: timers[id].paused });
-    updateTrayMenu();
-  });
-
-  globalShortcut.register(sc.toggle, () => {
-    if (!mainWindow) return;
-    if (mainWindow.isVisible()) mainWindow.hide();
-    else { mainWindow.show(); mainWindow.focus(); }
-  });
-}
-
 ipcMain.on('window-minimize', () => mainWindow.minimize());
 ipcMain.on('window-maximize', () => mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize());
-ipcMain.on('window-close',    () => {
+ipcMain.on('window-close', () => {
   if (settings.minimizeToTray && Object.keys(timers).length > 0) mainWindow.hide();
   else app.quit();
 });
@@ -430,7 +332,7 @@ ipcMain.on('start-timer', (e, data) => {
   Object.keys(timers).forEach(id => {
     clearInterval(timers[id].interval);
     if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
-    mainWindow.webContents.send('timer-cancelled', parseInt(id));
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', parseInt(id));
   });
   timers = {};
   const id = nextTimerId++;
@@ -445,7 +347,7 @@ ipcMain.on('pause-timer', (e, { id, paused }) => {
   timers[id].paused = paused;
   if (!paused) {
     Object.keys(timers).forEach(tid => { if (parseInt(tid) !== id) timers[tid].paused = true; });
-    mainWindow.webContents.send('others-paused', id);
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('others-paused', id);
   }
   updateTrayMenu();
 });
@@ -455,18 +357,20 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
   timers[id].remaining += seconds;
   timers[id].total     += seconds;
   timers[id].notifSentSet = new Set([...timers[id].notifSentSet].filter(s => s < timers[id].remaining));
-  mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
+  }
 });
 
-ipcMain.on('get-actions',    (e)       => e.reply('actions-data',  actionsData));
-ipcMain.on('save-actions',   (e, data) => { actionsData = data; saveActions(); });
-ipcMain.on('get-settings',   (e)       => e.reply('settings-data', settings));
-ipcMain.on('save-settings',  (e, data) => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
+ipcMain.on('get-actions',   e => e.reply('actions-data', actionsData));
+ipcMain.on('save-actions',  (e, data) => { actionsData = data; saveActions(); });
+ipcMain.on('get-settings',  e => e.reply('settings-data', settings));
+ipcMain.on('save-settings', (e, data) => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
 
 ipcMain.on('execute-now', (e, type) => {
   dialog.showMessageBox(mainWindow, {
     type: 'warning', buttons: ['Annuler', 'Confirmer'], defaultId: 0, cancelId: 0,
-    title: 'Confirmation', message: `Exécuter maintenant : ${getTypeName(type)} ?`,
+    title: 'Confirmation', message: `Exécuter maintenant : ${getTypeName(type)} ?`
   }).then(r => { if (r.response === 1) executeAction(type, null); });
 });
 
@@ -476,5 +380,32 @@ app.whenReady().then(() => {
   createTray();
   registerShortcuts();
 });
+
+function registerShortcuts() {
+  globalShortcut.unregisterAll();
+  const sc = {
+    cancel: 'CommandOrControl+Alt+S',
+    pause:  'CommandOrControl+Alt+P',
+    toggle: 'CommandOrControl+Alt+O',
+    ...(settings.shortcuts || {})
+  };
+  globalShortcut.register(sc.cancel, () => {
+    if (Object.keys(timers).length > 0) cancelAllTimers();
+    else if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
+  });
+  globalShortcut.register(sc.pause, () => {
+    const ids = Object.keys(timers);
+    if (!ids.length) return;
+    const id = parseInt(ids[0]);
+    timers[id].paused = !timers[id].paused;
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('shortcut-pause', { id, paused: timers[id].paused });
+    updateTrayMenu();
+  });
+  globalShortcut.register(sc.toggle, () => {
+    if (!mainWindow) return;
+    if (mainWindow.isVisible()) mainWindow.hide();
+    else { mainWindow.show(); mainWindow.focus(); }
+  });
+}
 
 app.on('window-all-closed', () => app.quit());
