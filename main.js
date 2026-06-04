@@ -242,7 +242,7 @@ function startTimer(id, seconds, actionData) {
     updateWindowTitle();
     if (t.remaining <= 0) {
       clearInterval(t.interval);
-      const shouldWait = actionData.waitForMusic !== undefined ? actionData.waitForMusic : settings.waitForMusic;
+      const shouldWait = actionData.waitForMusic != null ? actionData.waitForMusic : settings.waitForMusic;
       const musicState = getMusicState();
       log(`Timer ${id} fini — shouldWait=${shouldWait} playing=${musicState.playing} track="${musicState.track}"`);
       if (shouldWait && musicState.playing) startMusicWait(id, actionData);
