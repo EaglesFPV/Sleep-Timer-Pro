@@ -29,9 +29,10 @@ let settings = {
   }
 };
 
-const LOG_FILE = require('path').join(app.getPath('userData'), 'debug.log');
-function log(msg) { try { require('fs').appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
+const LOG_FILE = path.join(app.getPath('userData'), 'debug.log');
+function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
 
+function loadData() {
 
   try {
     if (fs.existsSync(DATA_FILE)) actionsData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
