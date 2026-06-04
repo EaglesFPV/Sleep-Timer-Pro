@@ -21,6 +21,7 @@ let settings = {
   deleteOnFinish: true,
   waitForMusic: false,
   waitForMusicMaxSecs: 0,
+  maxTimers: 10,
   shortcuts: {
     cancel: 'CommandOrControl+Alt+S',
     pause:  'CommandOrControl+Alt+P',
@@ -28,7 +29,10 @@ let settings = {
   }
 };
 
-function loadData() {
+const LOG_FILE = require('path').join(app.getPath('userData'), 'debug.log');
+function log(msg) { try { require('fs').appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
+
+
   try {
     if (fs.existsSync(DATA_FILE)) actionsData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     else { actionsData = []; saveActions(); }
@@ -163,6 +167,7 @@ function startMusicWait(id, actionData) {
   t.musicWaitStart = Date.now();
   const initialState = getMusicState();
   t.initialTrack = initialState.track;
+  log(`startMusicWait démarré — initialTrack="${t.initialTrack}"`);
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-waiting-music', { id });
   updateTrayMenu();
   const maxMs = settings.waitForMusicMaxSecs > 0 ? settings.waitForMusicMaxSecs * 1000 : null;
@@ -170,17 +175,20 @@ function startMusicWait(id, actionData) {
     if (!timers[id]) { clearInterval(t.musicInterval); return; }
     const elapsed = Date.now() - t.musicWaitStart;
     if (maxMs && elapsed >= maxMs) {
+      log(`startMusicWait timeout`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
       return;
     }
     const state = getMusicState();
+    log(`musicWait check — playing=${state.playing} track="${state.track}"`);
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('timer-music-status', { id, playing: state.playing, elapsed: Math.floor(elapsed / 1000), maxSecs: settings.waitForMusicMaxSecs || 0 });
     }
     const noSession = !state.playing && state.track === '';
     const paused    = !state.playing && state.track !== '';
     if (paused || noSession) {
+      log(`startMusicWait DÉCLENCHEMENT — paused=${paused} noSession=${noSession}`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
     }
@@ -234,7 +242,9 @@ function startTimer(id, seconds, actionData) {
     if (t.remaining <= 0) {
       clearInterval(t.interval);
       const shouldWait = actionData.waitForMusic !== undefined ? actionData.waitForMusic : settings.waitForMusic;
-      if (shouldWait && getMusicState().playing) startMusicWait(id, actionData);
+      const musicState = getMusicState();
+      log(`Timer ${id} fini — shouldWait=${shouldWait} playing=${musicState.playing} track="${musicState.track}"`);
+      if (shouldWait && musicState.playing) startMusicWait(id, actionData);
       else finishTimer(id, actionData);
     }
   }, 1000);
@@ -329,12 +339,17 @@ ipcMain.on('window-close', () => {
 });
 
 ipcMain.on('start-timer', (e, data) => {
+  const max = settings.maxTimers || 10;
+  if (Object.keys(timers).length >= max) {
+    e.reply('timer-limit-reached', max);
+    return;
+  }
   Object.keys(timers).forEach(id => {
-    clearInterval(timers[id].interval);
-    if (timers[id].musicInterval) clearInterval(timers[id].musicInterval);
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-cancelled', parseInt(id));
+    if (!timers[id].paused) {
+      timers[id].paused = true;
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-paused-by-new', parseInt(id));
+    }
   });
-  timers = {};
   const id = nextTimerId++;
   startTimer(id, data.seconds, data);
   e.reply('timer-started', { id, ...data });
