@@ -182,14 +182,14 @@ function startMusicWait(id, actionData) {
       return;
     }
     const state = getMusicState();
-    log(`musicWait check — playing=${state.playing} track="${state.track}"`);
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('timer-music-status', { id, playing: state.playing, elapsed: Math.floor(elapsed / 1000), maxSecs: settings.waitForMusicMaxSecs || 0 });
     }
-    const noSession = !state.playing && state.track === '';
-    const paused    = !state.playing && state.track !== '';
-    if (paused || noSession) {
-      log(`startMusicWait DÉCLENCHEMENT — paused=${paused} noSession=${noSession}`);
+    const paused       = !state.playing;
+    const trackChanged = t.initialTrack !== undefined && state.track !== t.initialTrack;
+    log(`musicWait check — playing=${state.playing} paused=${paused} track="${state.track}" initialTrack="${t.initialTrack}" trackChanged=${trackChanged}`);
+    if (paused || trackChanged) {
+      log(`startMusicWait DÉCLENCHEMENT — paused=${paused} trackChanged=${trackChanged}`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
     }

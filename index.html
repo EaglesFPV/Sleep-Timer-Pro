@@ -441,6 +441,13 @@ select.f-input option{background:var(--bg-card2);}
     <div class="set-card">
       <div class="f-lbl" style="margin-bottom:10px;">Comportement</div>
       <div class="set-item">
+        <div><div class="set-name">Nombre maximum de timers</div><div class="set-desc">Timers simultanés autorisés (1–50)</div></div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input class="set-input" id="in-maxTimers" type="number" min="1" max="50" value="10" oninput="saveMaxTimers(this.value)">
+          <span class="set-unit">timers</span>
+        </div>
+      </div>
+      <div class="set-item">
         <div><div class="set-name">Réduire dans la barre système</div><div class="set-desc">Reste actif en arrière-plan quand un timer tourne</div></div>
         <div class="toggle on" id="tgl-tray" onclick="togSet('minimizeToTray','tgl-tray')"></div>
       </div>
@@ -575,7 +582,7 @@ const NOTIF_ICONS = {
 let actions = [], settings = {
   notifEnabled: true, notifTimes: [300], addTimeAmount: 600, minimizeToTray: true,
   warnOnReplace: true, deleteOnFinish: true, waitForMusic: false, waitForMusicMaxSecs: 0,
-  quickTimeButtons: [300,600,900,1800,3600,-300,-600,-900]
+  maxTimers: 10, quickTimeButtons: [300,600,900,1800,3600,-300,-600,-900]
 };
 let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist') || '[]');
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
@@ -584,12 +591,18 @@ ipcRenderer.on('actions-data', (e, d) => { actions = d; renderActions(); renderM
 ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); });
 
 ipcRenderer.on('timer-started', (e, d) => {
-  Object.keys(activeTimers).forEach(id => delete activeTimers[id]);
-  document.querySelectorAll('.tc[data-tid]').forEach(el => el.remove());
   activeTimers[d.id] = { id: d.id, remaining: d.seconds, total: d.seconds, name: d.actionName, icon: d.actionIcon || 'clock', type: d.type, color: d.color || COLORS[0], paused: false };
   renderTimerCards(); updateSidebar(); updateStatus();
   showPage('p-timers');
   notif('play', `Timer démarré : ${d.actionName}`);
+});
+ipcRenderer.on('timer-paused-by-new', (e, id) => {
+  if (!activeTimers[id]) return;
+  activeTimers[id].paused = true;
+  updateTimerCard(id); updateStatus();
+});
+ipcRenderer.on('timer-limit-reached', (e, max) => {
+  notif('warn', `Maximum de ${max} timers atteint`);
 });
 ipcRenderer.on('timer-tick', (e, { id, remaining, total }) => {
   if (!activeTimers[id]) return;
@@ -613,11 +626,16 @@ ipcRenderer.on('action-executing', (e, { type, timerId }) => {
   document.getElementById('execTitleText').textContent = names[type] || type;
   document.getElementById('execOv').classList.add('open');
   const timerData = timerId && activeTimers[timerId] ? { seconds: activeTimers[timerId].total, actionName: activeTimers[timerId].name, actionIcon: activeTimers[timerId].icon, type: activeTimers[timerId].type, color: activeTimers[timerId].color } : null;
-  if (settings.deleteOnFinish) {
+  delete activeTimers[timerId];
+  const remaining = Object.keys(activeTimers).length;
+  if (settings.deleteOnFinish || remaining === 0) {
     Object.keys(activeTimers).forEach(id => delete activeTimers[id]);
     document.querySelectorAll('.tc[data-tid]').forEach(el => el.remove());
-    updateSidebar(); updateStatus();
+  } else {
+    const card = document.querySelector(`.tc[data-tid="${timerId}"]`);
+    if (card) card.remove();
   }
+  updateSidebar(); updateStatus();
   addHist(type, timerData);
 });
 ipcRenderer.on('action-error',  (e, msg) => { document.getElementById('execOv').classList.remove('open'); notif('warn', 'Erreur : ' + msg); });
@@ -752,10 +770,7 @@ function initSbDrag() {
 }
 
 function startTimerSingle(data) {
-  const hadTimer = Object.keys(activeTimers).length > 0;
-  if (hadTimer) Object.keys(activeTimers).forEach(id => ipc('cancel-timer', parseInt(id)));
   ipc('start-timer', data);
-  if (hadTimer && settings.warnOnReplace) notif('warn', 'Timer remplacé');
 }
 
 function renderTimerCards() {
@@ -851,7 +866,6 @@ function togglePause(id) {
   const t = activeTimers[id]; if (!t) return;
   t.paused = !t.paused;
   ipc('pause-timer', { id, paused: t.paused });
-  if (!t.paused) Object.keys(activeTimers).forEach(tid => { if (parseInt(tid) !== id) activeTimers[tid].paused = true; });
   renderTimerCards(); updateStatus();
   notif(t.paused ? 'pause' : 'play', t.paused ? 'Timer en pause' : 'Timer repris');
 }
@@ -981,6 +995,8 @@ function applySettings() {
   const maxH = document.getElementById('in-waitMusicMaxH');
   if (maxH) { maxH.value = Math.floor((settings.waitForMusicMaxSecs || 0) / 3600); document.getElementById('in-waitMusicMaxM').value = Math.floor(((settings.waitForMusicMaxSecs || 0) % 3600) / 60); }
   renderThresholdList(); renderQbPreview();
+  const mtEl = document.getElementById('in-maxTimers');
+  if (mtEl) mtEl.value = settings.maxTimers || 10;
   const s = settings.addTimeAmount || 600;
   const ah = document.getElementById('in-addH'); if (ah) { ah.value = Math.floor(s / 3600); document.getElementById('in-addM').value = Math.floor((s % 3600) / 60); document.getElementById('in-addS').value = s % 60; }
   const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
@@ -1046,6 +1062,11 @@ function saveHmsSetting(key, prefix) {
 }
 function saveWaitMusicMax() {
   settings.waitForMusicMaxSecs = (parseInt(document.getElementById('in-waitMusicMaxH').value) || 0) * 3600 + (parseInt(document.getElementById('in-waitMusicMaxM').value) || 0) * 60;
+  ipc('save-settings', settings);
+}
+function saveMaxTimers(val) {
+  const v = Math.min(50, Math.max(1, parseInt(val) || 10));
+  settings.maxTimers = v;
   ipc('save-settings', settings);
 }
 function togSet(key, tglId) { settings[key] = !settings[key]; ipc('save-settings', settings); applySettings(); }
