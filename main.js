@@ -29,11 +29,7 @@ let settings = {
   }
 };
 
-const LOG_FILE = path.join(app.getPath('userData'), 'debug.log');
-function log(msg) { try { fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`); } catch {} }
-
 function loadData() {
-
   try {
     if (fs.existsSync(DATA_FILE)) actionsData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     else { actionsData = []; saveActions(); }
@@ -168,7 +164,6 @@ function startMusicWait(id, actionData) {
   t.musicWaitStart = Date.now();
   const initialState = getMusicState();
   t.initialTrack = initialState.track;
-  log(`startMusicWait démarré — initialTrack="${t.initialTrack}"`);
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-waiting-music', { id });
   updateTrayMenu();
   const maxMs = settings.waitForMusicMaxSecs > 0 ? settings.waitForMusicMaxSecs * 1000 : null;
@@ -176,7 +171,6 @@ function startMusicWait(id, actionData) {
     if (!timers[id]) { clearInterval(t.musicInterval); return; }
     const elapsed = Date.now() - t.musicWaitStart;
     if (maxMs && elapsed >= maxMs) {
-      log(`startMusicWait timeout`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
       return;
@@ -187,9 +181,7 @@ function startMusicWait(id, actionData) {
     }
     const paused       = !state.playing;
     const trackChanged = t.initialTrack !== undefined && state.track !== t.initialTrack;
-    log(`musicWait check — playing=${state.playing} paused=${paused} track="${state.track}" initialTrack="${t.initialTrack}" trackChanged=${trackChanged}`);
     if (paused || trackChanged) {
-      log(`startMusicWait DÉCLENCHEMENT — paused=${paused} trackChanged=${trackChanged}`);
       clearInterval(t.musicInterval);
       finishTimer(id, actionData);
     }
@@ -244,7 +236,6 @@ function startTimer(id, seconds, actionData) {
       clearInterval(t.interval);
       const shouldWait = actionData.waitForMusic != null ? actionData.waitForMusic : settings.waitForMusic;
       const musicState = getMusicState();
-      log(`Timer ${id} fini — shouldWait=${shouldWait} playing=${musicState.playing} track="${musicState.track}"`);
       if (shouldWait && musicState.playing) startMusicWait(id, actionData);
       else finishTimer(id, actionData);
     }
