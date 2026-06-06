@@ -10,6 +10,7 @@
   "build": {
     "appId": "com.sleeptimerpro.app",
     "productName": "SleepTimer Pro",
+    "artifactName": "SleepTimer-Pro-${version}.exe",
     "directories": { "output": "dist" },
     "publish": [
       {
@@ -20,12 +21,12 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        { "target": "nsis", "arch": ["x64"] }
       ],
       "icon": "assets/icon.ico"
     },
     "nsis": {
+      "artifactName": "SleepTimer-Pro-Setup-${version}.exe",
       "oneClick": false,
       "perMachine": false,
       "allowElevation": false,
