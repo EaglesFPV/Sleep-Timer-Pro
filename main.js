@@ -377,7 +377,7 @@ ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); 
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
 ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
-ipcMain.on('install-update', ()         => autoUpdater.quitAndInstall());
+ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(false, true); });
 
 ipcMain.on('execute-now', (e, type) => {
   dialog.showMessageBox(mainWindow, {

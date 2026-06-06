@@ -527,7 +527,7 @@ select.f-input option{background:var(--bg-card2);}
         </div>
         <div class="set-item" style="padding:10px 0;border-bottom:none;">
           <div><div class="set-name">Code source</div></div>
-          <a href="https://github.com/EaglesFPV/Sleep-Timer-Pro" style="font-size:13px;color:var(--accent);text-decoration:none;">GitHub →</a>
+          <a href="https://github.com/EaglesFPV/Sleep-Timer-Pro" style="font-size:13px;color:var(--accent);text-decoration:none;">GitHub</a>
         </div>
       </div>
     </div>
@@ -733,7 +733,7 @@ function updateThemeBtn(isLight) {
   if (localStorage.getItem('stp_theme') === 'light') { document.body.classList.add('light'); updateThemeBtn(true); }
 })();
 
-ipc('get-actions'); ipc('get-settings'); ipc('get-version');
+ipc('get-actions'); ipc('get-settings');
 
 ipcRenderer.on('app-version', (e, v) => { const el = document.getElementById('appVersion'); if (el) el.textContent = v; });
 ipcRenderer.on('update-available', (e, v) => {
@@ -756,6 +756,7 @@ ipcRenderer.on('update-downloaded', (e, v) => {
 });
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
 loadSbOrder(); initSbDrag(); showPage('p-actions');
+ipc('get-version');
 
 function navClick(el) { if (!document.getElementById('sidebar').classList.contains('edit-mode')) showPage(el.dataset.page); }
 function showPage(id) {
@@ -795,8 +796,10 @@ function loadSbOrder() {
     list.appendChild(sep);
     const h = document.getElementById('nav-history');
     const s = document.getElementById('nav-settings');
+    const ab = document.getElementById('nav-about');
     if (h) list.appendChild(h);
     if (s) list.appendChild(s);
+    if (ab) list.appendChild(ab);
   } catch {}
 }
 let dragSrc = null;
