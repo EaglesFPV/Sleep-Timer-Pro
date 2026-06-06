@@ -519,7 +519,7 @@ select.f-input option{background:var(--bg-card2);}
           <div style="font-size:13px;font-weight:700;" id="updateBannerTitle">Mise à jour disponible</div>
           <div style="font-size:11px;color:var(--text-2);margin-top:2px;" id="updateBannerSub"></div>
         </div>
-        <button class="btn btn-primary" id="updateBtn" onclick="installUpdate()">Télécharger</button>
+        <button class="btn btn-primary" id="updateBtn" onclick="installUpdate()">Installer et redémarrer</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
         <div class="set-item" style="padding:10px 0;">
@@ -749,7 +749,17 @@ ipcRenderer.on('update-available', (e, v) => {
   const btn    = document.getElementById('updateBtn');
   if (banner) banner.style.display = 'flex';
   if (title)  title.textContent = 'Mise à jour disponible';
-  if (sub)    sub.textContent = `v${v} disponible`;
+  if (sub)    sub.textContent = `v${v} — téléchargement en cours…`;
+  if (btn)    btn.style.display = 'none';
+});
+ipcRenderer.on('update-downloaded', (e, v) => {
+  const banner = document.getElementById('updateBanner');
+  const title  = document.getElementById('updateBannerTitle');
+  const sub    = document.getElementById('updateBannerSub');
+  const btn    = document.getElementById('updateBtn');
+  if (banner) banner.style.display = 'flex';
+  if (title)  title.textContent = 'Mise à jour prête ✓';
+  if (sub)    sub.textContent = `v${v} téléchargée — cliquez pour installer`;
   if (btn)    btn.style.display = 'inline-flex';
 });
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
