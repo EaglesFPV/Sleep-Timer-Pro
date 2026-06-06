@@ -740,7 +740,11 @@ function updateThemeBtn(isLight) {
 
 ipc('get-actions'); ipc('get-settings');
 
-ipcRenderer.invoke('get-version').then(v => { const el = document.getElementById('appVersion'); if (el) el.textContent = v; }).catch(() => {});
+ipc('get-version');
+ipcRenderer.on('app-version', (e, v) => {
+  const el = document.getElementById('appVersion');
+  if (el) el.textContent = v;
+});
 ipcRenderer.on('update-available', (e, v) => {
   const banner = document.getElementById('updateBanner');
   const sub    = document.getElementById('updateBannerSub');
