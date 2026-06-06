@@ -131,19 +131,11 @@ function createTray() {
 }
 
 function setupAutoUpdater() {
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoDownload = false;
 
   autoUpdater.on('update-available', info => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow && !mainWindow.isDestroyed())
       mainWindow.webContents.send('update-available', info.version);
-    }
-  });
-
-  autoUpdater.on('update-downloaded', info => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('update-downloaded', info.version);
-    }
   });
 
   autoUpdater.on('error', () => {});
@@ -381,7 +373,7 @@ ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); 
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
 ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
-ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(false, true); });
+ipcMain.on('update-install', () => { const { shell } = require('electron'); shell.openExternal('https://github.com/EaglesFPV/Sleep-Timer-Pro/releases/latest'); });
 
 ipcMain.on('execute-now', (e, type) => {
   dialog.showMessageBox(mainWindow, {
