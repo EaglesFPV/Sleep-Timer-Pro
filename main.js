@@ -18,7 +18,6 @@ let settings = {
   notifTimes: [300],
   addTimeAmount: 600,
   minimizeToTray: true,
-  warnOnReplace: true,
   deleteOnFinish: true,
   waitForMusic: false,
   waitForMusicMaxSecs: 0,
