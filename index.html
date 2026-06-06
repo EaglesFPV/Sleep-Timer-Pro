@@ -5,8 +5,8 @@
 <title>SleepTimer Pro</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-:root{--bg-deep:#04080F;--bg-main:#080C18;--bg-card:#0C1120;--bg-card2:#101628;--bg-hover:#161E32;--border:rgba(90,120,210,0.1);--border-hi:rgba(100,149,237,0.35);--text-1:#EDF0FF;--text-2:#6E84B0;--text-3:#2E3D5A;--accent:#EF5B8D;--accent2:#EF5B8D;--danger:#EF5B8D;--warn:#F0A050;--ok:#3EC9A7;--r:12px;--r-sm:8px;}
-body.light{--bg-deep:#E4E7F2;--bg-main:#EEF0FA;--bg-card:#FFFFFF;--bg-card2:#E8EBF5;--bg-hover:#DCE0EF;--border:rgba(80,100,180,0.18);--border-hi:rgba(60,100,210,0.45);--text-1:#0D1530;--text-2:#3D4D78;--text-3:#8A94B8;--accent:#EF5B8D;--accent2:#EF5B8D;--danger:#EF5B8D;--warn:#A05800;--ok:#157850;}
+:root{--bg-deep:#04080F;--bg-main:#080C18;--bg-card:#0C1120;--bg-card2:#101628;--bg-hover:#161E32;--border:rgba(90,120,210,0.1);--border-hi:rgba(100,149,237,0.35);--text-1:#EDF0FF;--text-2:#6E84B0;--text-3:#2E3D5A;--accent:#5B8DEF;--accent2:#9B7FE8;--danger:#EF5B6E;--warn:#F0A050;--ok:#3EC9A7;--r:12px;--r-sm:8px;}
+body.light{--bg-deep:#E4E7F2;--bg-main:#EEF0FA;--bg-card:#FFFFFF;--bg-card2:#E8EBF5;--bg-hover:#DCE0EF;--border:rgba(80,100,180,0.18);--border-hi:rgba(60,100,210,0.45);--text-1:#0D1530;--text-2:#3D4D78;--text-3:#8A94B8;--accent:#2F63D4;--accent2:#6045B8;--danger:#CC2233;--warn:#A05800;--ok:#157850;}
 body.light .wbtn:hover{background:var(--bg-hover);color:var(--text-1);}
 body.light .wbtn.cls:hover{background:var(--danger);color:#fff;}
 body.light .sb{background:var(--bg-deep);}
@@ -501,7 +501,12 @@ select.f-input option{background:var(--bg-card2);}
 </div>
 </div>
   <div class="page" id="p-about">
-    <div class="sh"><div class="sh-title">À propos</div></div>
+    <div class="sh">
+      <div class="sh-title">À propos</div>
+      <button class="btn" onclick="showPage('p-actions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Retour
+      </button>
+    </div>
     <div class="set-card" style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 20px;text-align:center;">
       <svg viewBox="0 0 24 24" fill="none" stroke="#FFB347" stroke-width="2" stroke-linecap="round" style="width:52px;height:52px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       <div>
@@ -509,7 +514,7 @@ select.f-input option{background:var(--bg-card2);}
         <div style="font-size:13px;color:var(--text-2);margin-top:6px;">Gestionnaire d'arrêt programmé pour Windows</div>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--bg-card2);padding:6px 18px;border-radius:20px;border:1px solid var(--border);">v<span id="appVersion">—</span></div>
-      <div id="updateBanner" style="display:none;width:100%;background:rgba(91,141,239,.1);border:1px solid var(--border-hi);border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div id="updateBanner" style="display:none;width:100%;background:rgba(91,141,239,.1);border:1px solid var(--border-hi);border-radius:var(--r-sm);padding:14px 18px;align-items:center;justify-content:space-between;gap:12px;">
         <div>
           <div style="font-size:13px;font-weight:700;" id="updateBannerTitle">Mise à jour disponible</div>
           <div style="font-size:11px;color:var(--text-2);margin-top:2px;" id="updateBannerSub"></div>
@@ -735,12 +740,12 @@ function updateThemeBtn(isLight) {
 
 ipc('get-actions'); ipc('get-settings');
 
-ipcRenderer.on('app-version', (e, v) => { const el = document.getElementById('appVersion'); if (el) el.textContent = v; });
+ipcRenderer.invoke('get-version').then(v => { const el = document.getElementById('appVersion'); if (el) el.textContent = v; }).catch(() => {});
 ipcRenderer.on('update-available', (e, v) => {
   const banner = document.getElementById('updateBanner');
   const sub    = document.getElementById('updateBannerSub');
   const btn    = document.getElementById('updateBtn');
-  if (banner) { banner.style.display = 'flex'; }
+  if (banner) banner.style.display = 'flex';
   if (sub)    sub.textContent = `v${v} disponible — téléchargement en cours…`;
   if (btn)    btn.style.display = 'none';
 });
@@ -756,9 +761,12 @@ ipcRenderer.on('update-downloaded', (e, v) => {
 });
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
 loadSbOrder(); initSbDrag(); showPage('p-actions');
-ipc('get-version');
 
-function navClick(el) { if (!document.getElementById('sidebar').classList.contains('edit-mode')) showPage(el.dataset.page); }
+
+function navClick(el) {
+  if (document.getElementById('sidebar').classList.contains('edit-mode')) return;
+  showPage(el.dataset.page);
+}
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.getElementById(id).classList.add('on');
@@ -800,6 +808,7 @@ function loadSbOrder() {
     if (h) list.appendChild(h);
     if (s) list.appendChild(s);
     if (ab) list.appendChild(ab);
+    
   } catch {}
 }
 let dragSrc = null;
