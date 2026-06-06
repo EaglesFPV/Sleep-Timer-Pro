@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, dialog, Notification, globalShortcut } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
@@ -8,7 +9,7 @@ let tray;
 let timers = {};
 let nextTimerId = 1;
 
-const DATA_FILE = path.join(app.getPath('userData'), 'actions_v1.json');
+const DATA_FILE     = path.join(app.getPath('userData'), 'actions_v1.json');
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings_v1.json');
 
 let actionsData = [];
@@ -39,8 +40,8 @@ function loadData() {
   } catch {}
 }
 
-function saveActions() { try { fs.writeFileSync(DATA_FILE, JSON.stringify(actionsData, null, 2)); } catch {} }
-function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); } catch {} }
+function saveActions()  { try { fs.writeFileSync(DATA_FILE,     JSON.stringify(actionsData, null, 2)); } catch {} }
+function saveSettings() { try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings,    null, 2)); } catch {} }
 
 function getMusicState() {
   const psScript = `
@@ -84,10 +85,7 @@ exit 0
   const tmpFile = path.join(app.getPath('temp'), 'stp_music_check.ps1');
   try {
     fs.writeFileSync(tmpFile, psScript, 'utf8');
-    const out = execSync(
-      `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`,
-      { timeout: 8000, windowsHide: true }
-    ).toString();
+    const out        = execSync(`powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${tmpFile}"`, { timeout: 8000, windowsHide: true }).toString();
     const playing    = out.includes('PLAYING:True');
     const trackMatch = out.match(/TRACK:(.*)/);
     const track      = trackMatch ? trackMatch[1].trim() : '';
@@ -110,7 +108,10 @@ function createWindow() {
     show: false
   });
   mainWindow.loadFile('index.html');
-  mainWindow.once('ready-to-show', () => mainWindow.show());
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    autoUpdater.checkForUpdatesAndNotify();
+  });
   mainWindow.on('close', e => {
     if (settings.minimizeToTray && Object.keys(timers).length > 0) {
       e.preventDefault();
@@ -129,6 +130,25 @@ function createTray() {
   tray.on('double-click', () => { mainWindow.show(); mainWindow.focus(); });
 }
 
+function setupAutoUpdater() {
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-available', info => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-available', info.version);
+    }
+  });
+
+  autoUpdater.on('update-downloaded', info => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('update-downloaded', info.version);
+    }
+  });
+
+  autoUpdater.on('error', () => {});
+}
+
 function updateWindowTitle() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   const ids = Object.keys(timers);
@@ -140,16 +160,13 @@ function updateWindowTitle() {
 
 function updateTrayMenu() {
   const activeTimers = Object.values(timers);
-  const timerItems = activeTimers.length === 0
+  const timerItems   = activeTimers.length === 0
     ? [{ label: 'Aucun timer actif', enabled: false }]
-    : activeTimers.map(t => ({
-        label: `${t.actionName} — ${t.waitingMusic ? 'Attente fin musique…' : formatTime(t.remaining)}`,
-        enabled: false
-      }));
+    : activeTimers.map(t => ({ label: `${t.actionName} — ${t.waitingMusic ? 'Attente fin musique…' : formatTime(t.remaining)}`, enabled: false }));
   const menu = Menu.buildFromTemplate([
     ...timerItems,
     { type: 'separator' },
-    { label: 'Ouvrir', click: () => { mainWindow.show(); mainWindow.focus(); } },
+    { label: 'Ouvrir',       click: () => { mainWindow.show(); mainWindow.focus(); } },
     { label: 'Tout annuler', enabled: activeTimers.length > 0, click: () => cancelAllTimers() },
     { type: 'separator' },
     { label: 'Quitter', click: () => { Object.keys(timers).forEach(id => clearInterval(timers[id].interval)); app.quit(); } }
@@ -160,7 +177,7 @@ function updateTrayMenu() {
 function startMusicWait(id, actionData) {
   const t = timers[id];
   if (!t) return;
-  t.waitingMusic = true;
+  t.waitingMusic   = true;
   t.musicWaitStart = Date.now();
   const initialState = getMusicState();
   t.initialTrack = initialState.track;
@@ -200,14 +217,9 @@ function startTimer(id, seconds, actionData) {
   if (timers[id]) clearInterval(timers[id].interval);
   const thresholds = Array.isArray(settings.notifTimes) ? settings.notifTimes : [settings.notifTimes || 300];
   timers[id] = {
-    id,
-    remaining: seconds,
-    total: seconds,
-    actionName: actionData.actionName,
-    actionIcon: actionData.actionIcon,
-    type: actionData.type,
-    paused: false,
-    waitingMusic: false,
+    id, remaining: seconds, total: seconds,
+    actionName: actionData.actionName, actionIcon: actionData.actionIcon, type: actionData.type,
+    paused: false, waitingMusic: false,
     notifSentSet: new Set(thresholds.filter(t => t >= seconds)),
     interval: null
   };
@@ -217,7 +229,7 @@ function startTimer(id, seconds, actionData) {
     if (!t || t.paused) { lastTick = Date.now(); return; }
     const now   = Date.now();
     const delta = Math.min(Math.round((now - lastTick) / 1000), 60);
-    lastTick = now;
+    lastTick    = now;
     t.remaining = Math.max(0, t.remaining - delta);
     if (settings.notifEnabled) {
       thresholds.forEach(threshold => {
@@ -227,9 +239,7 @@ function startTimer(id, seconds, actionData) {
         }
       });
     }
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('timer-tick', { id, remaining: t.remaining, total: t.total });
-    }
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-tick', { id, remaining: t.remaining, total: t.total });
     updateTrayMenu();
     updateWindowTitle();
     if (t.remaining <= 0) {
@@ -247,18 +257,18 @@ function sendWindowsNotification(timerId, t, threshold) {
   if (!Notification.isSupported()) return;
   const notif = new Notification({
     title: `SleepTimer Pro — ${t.actionName}`,
-    body: `${getTypeName(t.type)} dans ${formatTime(threshold)}. Cliquez pour ajouter ${formatTime(settings.addTimeAmount)}.`,
-    icon: path.join(__dirname, 'assets', 'icon.ico'),
+    body:  `${getTypeName(t.type)} dans ${formatTime(threshold)}. Cliquez pour ajouter ${formatTime(settings.addTimeAmount)}.`,
+    icon:  path.join(__dirname, 'assets', 'icon.ico'),
     timeoutType: 'never'
   });
   notif.on('click', () => {
     if (!timers[timerId]) return;
-    timers[timerId].remaining += settings.addTimeAmount;
-    timers[timerId].total     += settings.addTimeAmount;
-    timers[timerId].notifSentSet = new Set([...timers[timerId].notifSentSet].filter(s => s < timers[timerId].remaining));
+    timers[timerId].remaining    += settings.addTimeAmount;
+    timers[timerId].total        += settings.addTimeAmount;
+    timers[timerId].notifSentSet  = new Set([...timers[timerId].notifSentSet].filter(s => s < timers[timerId].remaining));
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('timer-tick', { id: timerId, remaining: timers[timerId].remaining, total: timers[timerId].total });
-      mainWindow.webContents.send('time-added', { id: timerId, added: settings.addTimeAmount });
+      mainWindow.webContents.send('timer-tick',   { id: timerId, remaining: timers[timerId].remaining, total: timers[timerId].total });
+      mainWindow.webContents.send('time-added',   { id: timerId, added: settings.addTimeAmount });
     }
   });
   notif.show();
@@ -311,31 +321,26 @@ function executeAction(type, timerId) {
 }
 
 function formatTime(secs) {
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
   if (h > 0) return `${h}h${String(m).padStart(2, '0')}`;
   if (m > 0) return `${m}m${String(s).padStart(2, '0')}s`;
   return `${s}s`;
 }
 
 function getTypeName(type) {
-  return { sleep: 'Veille', shutdown: 'Extinction', restart: 'Redémarrage', hibernate: 'Hibernation', lock: 'Verrouillage', logoff: 'Déconnexion' }[type] || type;
+  return { sleep:'Veille', shutdown:'Extinction', restart:'Redémarrage', hibernate:'Hibernation', lock:'Verrouillage', logoff:'Déconnexion' }[type] || type;
 }
 
 ipcMain.on('window-minimize', () => mainWindow.minimize());
 ipcMain.on('window-maximize', () => mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize());
-ipcMain.on('window-close', () => {
+ipcMain.on('window-close',   () => {
   if (settings.minimizeToTray && Object.keys(timers).length > 0) mainWindow.hide();
   else app.quit();
 });
 
 ipcMain.on('start-timer', (e, data) => {
   const max = settings.maxTimers || 10;
-  if (Object.keys(timers).length >= max) {
-    e.reply('timer-limit-reached', max);
-    return;
-  }
+  if (Object.keys(timers).length >= max) { e.reply('timer-limit-reached', max); return; }
   Object.keys(timers).forEach(id => {
     if (!timers[id].paused) {
       timers[id].paused = true;
@@ -361,18 +366,18 @@ ipcMain.on('pause-timer', (e, { id, paused }) => {
 
 ipcMain.on('add-time', (e, { id, seconds }) => {
   if (!timers[id]) return;
-  timers[id].remaining += seconds;
-  timers[id].total     += seconds;
-  timers[id].notifSentSet = new Set([...timers[id].notifSentSet].filter(s => s < timers[id].remaining));
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
-  }
+  timers[id].remaining    += seconds;
+  timers[id].total        += seconds;
+  timers[id].notifSentSet  = new Set([...timers[id].notifSentSet].filter(s => s < timers[id].remaining));
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
 });
 
-ipcMain.on('get-actions',   e => e.reply('actions-data', actionsData));
-ipcMain.on('save-actions',  (e, data) => { actionsData = data; saveActions(); });
-ipcMain.on('get-settings',  e => e.reply('settings-data', settings));
-ipcMain.on('save-settings', (e, data) => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
+ipcMain.on('get-actions',    e          => e.reply('actions-data',  actionsData));
+ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); });
+ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
+ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
+ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
+ipcMain.on('install-update', ()         => autoUpdater.quitAndInstall());
 
 ipcMain.on('execute-now', (e, type) => {
   dialog.showMessageBox(mainWindow, {
@@ -385,17 +390,13 @@ app.whenReady().then(() => {
   loadData();
   createWindow();
   createTray();
+  setupAutoUpdater();
   registerShortcuts();
 });
 
 function registerShortcuts() {
   globalShortcut.unregisterAll();
-  const sc = {
-    cancel: 'CommandOrControl+Alt+S',
-    pause:  'CommandOrControl+Alt+P',
-    toggle: 'CommandOrControl+Alt+O',
-    ...(settings.shortcuts || {})
-  };
+  const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', ...(settings.shortcuts || {}) };
   globalShortcut.register(sc.cancel, () => {
     if (Object.keys(timers).length > 0) cancelAllTimers();
     else if (mainWindow) { mainWindow.show(); mainWindow.focus(); }

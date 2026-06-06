@@ -290,6 +290,9 @@ select.f-input option{background:var(--bg-card2);}
     <div class="nav" id="nav-settings" data-page="p-settings" data-locked="true" onclick="navClick(this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="#9B7FE8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Paramètres
     </div>
+    <div class="nav" id="nav-about" data-page="p-about" data-locked="true" onclick="navClick(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#5BC4EF" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>À propos
+    </div>
   </div>
   <div class="sb-gap"></div>
   <div class="sb-timers" id="sbTimers" style="display:none"></div>
@@ -374,6 +377,12 @@ select.f-input option{background:var(--bg-card2);}
         <div class="type-btn" data-type="lock" onclick="selType(this)"><svg viewBox="0 0 24 24" fill="none" stroke="#A8FF3E" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span class="tn">Verrouiller</span></div>
         <div class="type-btn" data-type="logoff" onclick="selType(this)"><svg viewBox="0 0 24 24" fill="none" stroke="#FF6348" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="tn">Déconnexion</span></div>
       </div>
+      <div class="f-lbl" style="margin:16px 0 8px;">Attendre la fin de la musique</div>
+      <select class="music-select" id="customWaitMusic" style="margin-bottom:16px;">
+        <option value="null">Défaut (réglage global)</option>
+        <option value="true">Activé pour ce timer</option>
+        <option value="false">Désactivé pour ce timer</option>
+      </select>
       <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;" onclick="startCustom()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Démarrer le timer
       </button>
@@ -491,6 +500,38 @@ select.f-input option{background:var(--bg-card2);}
   </div>
 </div>
 </div>
+  <div class="page" id="p-about">
+    <div class="sh"><div class="sh-title">À propos</div></div>
+    <div class="set-card" style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px 20px;text-align:center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FFB347" stroke-width="2" stroke-linecap="round" style="width:52px;height:52px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:.5px;">SleepTimer <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">PRO</span></div>
+        <div style="font-size:13px;color:var(--text-2);margin-top:6px;">Gestionnaire d'arrêt programmé pour Windows</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--bg-card2);padding:6px 18px;border-radius:20px;border:1px solid var(--border);">v<span id="appVersion">—</span></div>
+      <div id="updateBanner" style="display:none;width:100%;background:rgba(91,141,239,.1);border:1px solid var(--border-hi);border-radius:var(--r-sm);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-size:13px;font-weight:700;" id="updateBannerTitle">Mise à jour disponible</div>
+          <div style="font-size:11px;color:var(--text-2);margin-top:2px;" id="updateBannerSub"></div>
+        </div>
+        <button class="btn btn-primary" id="updateBtn" onclick="ipc('update-install')">Installer</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+        <div class="set-item" style="padding:10px 0;">
+          <div><div class="set-name">Développeur</div></div>
+          <div style="font-size:13px;color:var(--text-2);">EaglesFPV</div>
+        </div>
+        <div class="set-item" style="padding:10px 0;">
+          <div><div class="set-name">Licence</div></div>
+          <div style="font-size:13px;color:var(--text-2);">MIT</div>
+        </div>
+        <div class="set-item" style="padding:10px 0;border-bottom:none;">
+          <div><div class="set-name">Code source</div></div>
+          <a href="https://github.com/EaglesFPV/Sleep-Timer-Pro" style="font-size:13px;color:var(--accent);text-decoration:none;">GitHub →</a>
+        </div>
+      </div>
+    </div>
+  </div>
 <div class="overlay" id="modal">
   <div class="modal">
     <div class="modal-title">
@@ -692,7 +733,27 @@ function updateThemeBtn(isLight) {
   if (localStorage.getItem('stp_theme') === 'light') { document.body.classList.add('light'); updateThemeBtn(true); }
 })();
 
-ipc('get-actions'); ipc('get-settings');
+ipc('get-actions'); ipc('get-settings'); ipc('get-version');
+
+ipcRenderer.on('app-version', (e, v) => { const el = document.getElementById('appVersion'); if (el) el.textContent = v; });
+ipcRenderer.on('update-available', (e, v) => {
+  const banner = document.getElementById('updateBanner');
+  const sub    = document.getElementById('updateBannerSub');
+  const btn    = document.getElementById('updateBtn');
+  if (banner) { banner.style.display = 'flex'; }
+  if (sub)    sub.textContent = `v${v} disponible — téléchargement en cours…`;
+  if (btn)    btn.style.display = 'none';
+});
+ipcRenderer.on('update-downloaded', (e, v) => {
+  const banner = document.getElementById('updateBanner');
+  const title  = document.getElementById('updateBannerTitle');
+  const sub    = document.getElementById('updateBannerSub');
+  const btn    = document.getElementById('updateBtn');
+  if (banner) banner.style.display = 'flex';
+  if (title)  title.textContent = 'Mise à jour prête';
+  if (sub)    sub.textContent = `v${v} téléchargée — redémarrez pour installer`;
+  if (btn)    btn.style.display = 'inline-flex';
+});
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
 loadSbOrder(); initSbDrag(); showPage('p-actions');
 
@@ -894,7 +955,9 @@ function startCustom() {
   const total = h * 3600 + m * 60 + s;
   if (total <= 0) { notif('warn', 'Durée invalide'); return; }
   const names = { sleep:'Veille', shutdown:'Extinction', restart:'Redémarrage', hibernate:'Hibernation', lock:'Verrouillage', logoff:'Déconnexion' };
-  startTimerSingle({ seconds: total, actionName: names[selCustomType], actionIcon: selCustomType === 'sleep' ? 'clock' : 'zap', type: selCustomType, color: TYPE_COLORS[selCustomType] || COLORS[0] });
+  const wfmRaw = document.getElementById('customWaitMusic')?.value || 'null';
+  const waitForMusic = wfmRaw === 'true' ? true : wfmRaw === 'false' ? false : null;
+  startTimerSingle({ seconds: total, actionName: names[selCustomType], actionIcon: selCustomType === 'sleep' ? 'clock' : 'zap', type: selCustomType, color: TYPE_COLORS[selCustomType] || COLORS[0], waitForMusic });
 }
 
 function renderActions() {
