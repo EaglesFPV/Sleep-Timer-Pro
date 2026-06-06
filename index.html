@@ -519,7 +519,7 @@ select.f-input option{background:var(--bg-card2);}
           <div style="font-size:13px;font-weight:700;" id="updateBannerTitle">Mise à jour disponible</div>
           <div style="font-size:11px;color:var(--text-2);margin-top:2px;" id="updateBannerSub"></div>
         </div>
-        <button class="btn btn-primary" id="updateBtn" onclick="ipc('update-install')">Installer</button>
+        <button class="btn btn-primary" id="updateBtn" onclick="installUpdate()">Installer et redémarrer</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
         <div class="set-item" style="padding:10px 0;">
@@ -634,7 +634,7 @@ let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist') ||
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
 
 ipcRenderer.on('actions-data', (e, d) => { actions = d; renderActions(); renderManage(); });
-ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); });
+ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); ipc('get-version'); });
 
 ipcRenderer.on('timer-started', (e, d) => {
   activeTimers[d.id] = { id: d.id, remaining: d.seconds, total: d.seconds, name: d.actionName, icon: d.actionIcon || 'clock', type: d.type, color: d.color || COLORS[0], paused: false };
@@ -740,16 +740,17 @@ function updateThemeBtn(isLight) {
 
 ipc('get-actions'); ipc('get-settings');
 
-ipc('get-version');
 ipcRenderer.on('app-version', (e, v) => {
   const el = document.getElementById('appVersion');
   if (el) el.textContent = v;
 });
 ipcRenderer.on('update-available', (e, v) => {
   const banner = document.getElementById('updateBanner');
+  const title  = document.getElementById('updateBannerTitle');
   const sub    = document.getElementById('updateBannerSub');
   const btn    = document.getElementById('updateBtn');
   if (banner) banner.style.display = 'flex';
+  if (title)  title.textContent = 'Mise à jour disponible';
   if (sub)    sub.textContent = `v${v} disponible — téléchargement en cours…`;
   if (btn)    btn.style.display = 'none';
 });
@@ -759,8 +760,8 @@ ipcRenderer.on('update-downloaded', (e, v) => {
   const sub    = document.getElementById('updateBannerSub');
   const btn    = document.getElementById('updateBtn');
   if (banner) banner.style.display = 'flex';
-  if (title)  title.textContent = 'Mise à jour prête';
-  if (sub)    sub.textContent = `v${v} téléchargée — redémarrez pour installer`;
+  if (title)  title.textContent = 'Mise à jour prête ✓';
+  if (sub)    sub.textContent = `v${v} prête — cliquez pour redémarrer et installer`;
   if (btn)    btn.style.display = 'inline-flex';
 });
 buildIconGrid(); buildColorRow(); renderManage(); renderHist();
@@ -1142,6 +1143,13 @@ function saveHmsSetting(key, prefix) {
 function saveWaitMusicMax() {
   settings.waitForMusicMaxSecs = (parseInt(document.getElementById('in-waitMusicMaxH').value) || 0) * 3600 + (parseInt(document.getElementById('in-waitMusicMaxM').value) || 0) * 60;
   ipc('save-settings', settings);
+}
+function installUpdate() {
+  ipc('update-install');
+  setTimeout(() => {
+    const { shell } = require('electron');
+    shell.openExternal('https://github.com/EaglesFPV/Sleep-Timer-Pro/releases/latest');
+  }, 2000);
 }
 function saveMaxTimers(val) {
   const v = Math.min(50, Math.max(1, parseInt(val) || 10));

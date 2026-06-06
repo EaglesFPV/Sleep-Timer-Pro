@@ -147,6 +147,10 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('error', () => {});
+
+  setTimeout(() => {
+    try { autoUpdater.checkForUpdates(); } catch {}
+  }, 3000);
 }
 
 function updateWindowTitle() {
