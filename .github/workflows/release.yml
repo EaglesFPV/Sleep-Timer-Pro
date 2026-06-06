@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (ex: 1.0.1)'
+        description: 'Version (ex: 2.0.3)'
         required: true
 
 permissions:
@@ -42,5 +42,6 @@ jobs:
           files: |
             dist/SleepTimer Pro Setup ${{ github.event.inputs.version }}.exe
             dist/SleepTimer Pro ${{ github.event.inputs.version }}.exe
+            dist/latest.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
