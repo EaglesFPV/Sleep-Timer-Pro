@@ -22,6 +22,7 @@ let settings = {
   waitForMusic: false,
   waitForMusicMaxSecs: 0,
   maxTimers: 10,
+  shortcutsEnabled: true,
   shortcuts: {
     cancel: 'CommandOrControl+Alt+S',
     pause:  'CommandOrControl+Alt+P',
@@ -376,7 +377,7 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
 ipcMain.on('get-actions',    e          => e.reply('actions-data',  actionsData));
 ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); });
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
-ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
+ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
 ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(true, true); });
 ipcMain.on('check-updates', () => { try { autoUpdater.checkForUpdates(); } catch {} });
@@ -398,6 +399,7 @@ app.whenReady().then(() => {
 
 function registerShortcuts() {
   globalShortcut.unregisterAll();
+  if (!settings.shortcutsEnabled) return;
   const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', ...(settings.shortcuts || {}) };
   globalShortcut.register(sc.cancel, () => {
     const ids = Object.keys(timers);
@@ -425,6 +427,15 @@ function registerShortcuts() {
     timers[id].paused = !timers[id].paused;
     if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('shortcut-pause', { id, paused: timers[id].paused });
     updateTrayMenu();
+    if (Notification.isSupported()) {
+      const n = new Notification({
+        title: 'SleepTimer Pro',
+        body: timers[id].paused ? `${timers[id].actionName} — mis en pause` : `${timers[id].actionName} — repris`,
+        icon: path.join(__dirname, 'assets', 'icon.ico'),
+        silent: true
+      });
+      n.show();
+    }
   });
   globalShortcut.register(sc.toggle, () => {
     if (!mainWindow) return;

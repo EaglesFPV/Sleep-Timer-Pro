@@ -481,6 +481,10 @@ select.f-input option{background:var(--bg-card2);}
     <div class="set-card">
       <div class="f-lbl" style="margin-bottom:10px;">Raccourcis clavier globaux</div>
       <div class="set-item">
+        <div><div class="set-name">Activer les raccourcis</div><div class="set-desc">Raccourcis clavier globaux actifs en arrière-plan</div></div>
+        <div class="toggle on" id="tgl-shortcutsEnabled" onclick="togSet('shortcutsEnabled','tgl-shortcutsEnabled')"></div>
+      </div>
+      <div class="set-item">
         <div><div class="set-name">Annuler le timer</div><div class="set-desc">Annule le timer actif depuis n'importe où</div></div>
         <div id="sc-cancel" class="sc-badge" onclick="startShortcutCapture('cancel')">Ctrl+Alt+S</div>
       </div>
@@ -625,7 +629,7 @@ const NOTIF_ICONS = {
 let actions = [], settings = {
   notifEnabled: true, notifTimes: [300], addTimeAmount: 600, minimizeToTray: true,
   deleteOnFinish: true, waitForMusic: false, waitForMusicMaxSecs: 0,
-  maxTimers: 10, quickTimeButtons: [300,600,900,1800,3600,-300,-600,-900]
+  maxTimers: 10, shortcutsEnabled: true, quickTimeButtons: [300,600,900,1800,3600,-300,-600,-900]
 };
 let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist') || '[]');
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
@@ -1064,7 +1068,7 @@ function renderHist() {
 function relaunchHist(i) { const h = history[i]; if (!h?.timerData) return; startTimerSingle(h.timerData); notif('play', `Timer relancé : ${h.timerData.actionName}`); }
 
 function applySettings() {
-  const map = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', deleteOnFinish:'tgl-deleteFinish', waitForMusic:'tgl-waitMusic' };
+  const map = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', deleteOnFinish:'tgl-deleteFinish', waitForMusic:'tgl-waitMusic', shortcutsEnabled:'tgl-shortcutsEnabled' };
   Object.entries(map).forEach(([k, id]) => { const el = document.getElementById(id); if (el) el.className = 'toggle' + (settings[k] ? ' on' : ''); });
   const maxEl = document.getElementById('waitMusicMaxRow');
   if (maxEl) maxEl.style.display = settings.waitForMusic ? 'flex' : 'none';

@@ -1,7 +1,7 @@
 {
   "name": "sleeptimer-pro",
   "version": "1.0.0",
-  "description": "SleepTimer Pro - Gestionnaire d'arrêt programmé",
+  "description": "SleepTimer Pro - Gestionnaire d'arr\u00eat programm\u00e9",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,7 +11,9 @@
     "appId": "com.sleeptimerpro.app",
     "productName": "SleepTimer Pro",
     "artifactName": "SleepTimer-Pro-${version}.exe",
-    "directories": { "output": "dist" },
+    "directories": {
+      "output": "dist"
+    },
     "publish": [
       {
         "provider": "github",
@@ -21,7 +23,12 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "assets/icon.ico"
     },
@@ -35,7 +42,9 @@
       "createStartMenuShortcut": true,
       "shortcutName": "SleepTimer Pro",
       "runAfterFinish": true,
-      "installerLanguages": ["fr-FR"],
+      "installerLanguages": [
+        "fr-FR"
+      ],
       "language": "1036"
     }
   },
