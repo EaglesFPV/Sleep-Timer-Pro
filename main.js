@@ -399,8 +399,37 @@ function registerShortcuts() {
   globalShortcut.unregisterAll();
   const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', ...(settings.shortcuts || {}) };
   globalShortcut.register(sc.cancel, () => {
-    if (Object.keys(timers).length > 0) cancelAllTimers();
-    else if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
+    const ids = Object.keys(timers);
+    if (!ids.length) return;
+    const popup = new BrowserWindow({
+      width: 340,
+      height: 160,
+      frame: false,
+      resizable: false,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      backgroundColor: '#0C1120',
+      webPreferences: { nodeIntegration: true, contextIsolation: false }
+    });
+    const msg = ids.length > 1 ? `Annuler les ${ids.length} timers en cours ?` : 'Annuler le timer en cours ?';
+    popup.loadURL(`data:text/html,<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+      *{margin:0;padding:0;box-sizing:border-box;}
+      body{font-family:'Segoe UI',sans-serif;background:#0C1120;color:#EDF0FF;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px;user-select:none;-webkit-app-region:drag;}
+      p{font-size:14px;font-weight:600;text-align:center;padding:0 20px;}
+      .btns{display:flex;gap:10px;-webkit-app-region:no-drag;}
+      button{padding:8px 24px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;}
+      .ok{background:linear-gradient(135deg,#EF5B6E,#c0392b);color:#fff;}
+      .cancel{background:#161E32;color:#6E84B0;border:1px solid rgba(90,120,210,0.2);}
+    </style></head><body>
+      <p>${msg}</p>
+      <div class="btns">
+        <button class="cancel" onclick="require('electron').ipcRenderer.send('popup-cancel')">Annuler</button>
+        <button class="ok" onclick="require('electron').ipcRenderer.send('popup-confirm')">Confirmer</button>
+      </div>
+    </body></html>`);
+    ipcMain.once('popup-confirm', () => { popup.close(); cancelAllTimers(); });
+    ipcMain.once('popup-cancel',  () => { popup.close(); });
+    popup.on('blur', () => popup.close());
   });
   globalShortcut.register(sc.pause, () => {
     const ids = Object.keys(timers);
