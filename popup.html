@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0C1120;
+  color: #EDF0FF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 22px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+p {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 24px;
+  color: #EDF0FF;
+  line-height: 1.5;
+}
+.btns {
+  display: flex;
+  gap: 10px;
+  -webkit-app-region: no-drag;
+}
+button {
+  padding: 9px 26px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Segoe UI', sans-serif;
+  transition: opacity .15s;
+}
+button:hover { opacity: .85; }
+.ok { background: linear-gradient(135deg, #EF5B6E, #c0392b); color: #fff; }
+.cancel { background: #161E32; color: #6E84B0; border: 1px solid rgba(90,120,210,0.2); }
+</style>
+</head>
+<body>
+<p id="msg">Annuler le timer en cours ?</p>
+<div class="btns">
+  <button class="cancel" onclick="cancel()">Annuler</button>
+  <button class="ok" onclick="confirm()">Confirmer</button>
+</div>
+<script>
+const { ipcRenderer } = require('electron');
+const params = new URLSearchParams(window.location.search);
+document.getElementById('msg').textContent = params.get('msg') || 'Annuler le timer en cours ?';
+function cancel()  { ipcRenderer.send('popup-cancel'); }
+function confirm() { ipcRenderer.send('popup-confirm'); }
+</script>
+</body>
+</html>

@@ -378,7 +378,7 @@ ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); 
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
 ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
-ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(false, true); });
+ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(true, true); });
 ipcMain.on('check-updates', () => { try { autoUpdater.checkForUpdates(); } catch {} });
 
 ipcMain.on('execute-now', (e, type) => {
@@ -402,6 +402,7 @@ function registerShortcuts() {
   globalShortcut.register(sc.cancel, () => {
     const ids = Object.keys(timers);
     if (!ids.length) return;
+    const msg = ids.length > 1 ? `Annuler les ${ids.length} timers en cours ?` : 'Annuler le timer en cours ?';
     const popup = new BrowserWindow({
       width: 340,
       height: 160,
@@ -412,25 +413,10 @@ function registerShortcuts() {
       backgroundColor: '#0C1120',
       webPreferences: { nodeIntegration: true, contextIsolation: false }
     });
-    const msg = ids.length > 1 ? `Annuler les ${ids.length} timers en cours ?` : 'Annuler le timer en cours ?';
-    popup.loadURL(`data:text/html,<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-      *{margin:0;padding:0;box-sizing:border-box;}
-      body{font-family:'Segoe UI',sans-serif;background:#0C1120;color:#EDF0FF;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px;user-select:none;-webkit-app-region:drag;}
-      p{font-size:14px;font-weight:600;text-align:center;padding:0 20px;}
-      .btns{display:flex;gap:10px;-webkit-app-region:no-drag;}
-      button{padding:8px 24px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;}
-      .ok{background:linear-gradient(135deg,#EF5B6E,#c0392b);color:#fff;}
-      .cancel{background:#161E32;color:#6E84B0;border:1px solid rgba(90,120,210,0.2);}
-    </style></head><body>
-      <p>${msg}</p>
-      <div class="btns">
-        <button class="cancel" onclick="require('electron').ipcRenderer.send('popup-cancel')">Annuler</button>
-        <button class="ok" onclick="require('electron').ipcRenderer.send('popup-confirm')">Confirmer</button>
-      </div>
-    </body></html>`);
+    popup.loadFile(path.join(__dirname, 'popup.html'), { query: { msg } });
     ipcMain.once('popup-confirm', () => { popup.close(); cancelAllTimers(); });
     ipcMain.once('popup-cancel',  () => { popup.close(); });
-    popup.on('blur', () => popup.close());
+    popup.on('blur', () => { popup.close(); });
   });
   globalShortcut.register(sc.pause, () => {
     const ids = Object.keys(timers);
