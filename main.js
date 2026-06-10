@@ -414,9 +414,9 @@ function registerShortcuts() {
       webPreferences: { nodeIntegration: true, contextIsolation: false }
     });
     popup.loadFile(path.join(__dirname, 'popup.html'), { query: { msg } });
-    ipcMain.once('popup-confirm', () => { popup.close(); cancelAllTimers(); });
-    ipcMain.once('popup-cancel',  () => { popup.close(); });
-    popup.on('blur', () => { popup.close(); });
+    ipcMain.once('popup-confirm', () => { if (!popup.isDestroyed()) popup.close(); cancelAllTimers(); });
+    ipcMain.once('popup-cancel',  () => { if (!popup.isDestroyed()) popup.close(); });
+    popup.on('blur', () => { if (!popup.isDestroyed()) popup.close(); });
   });
   globalShortcut.register(sc.pause, () => {
     const ids = Object.keys(timers);
