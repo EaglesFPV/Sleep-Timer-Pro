@@ -27,6 +27,11 @@ let settings = {
     cancel: 'CommandOrControl+Alt+S',
     pause:  'CommandOrControl+Alt+P',
     toggle: 'CommandOrControl+Alt+O'
+  },
+  shortcutsEnabledMap: {
+    cancel: true,
+    pause: true,
+    toggle: true
   }
 };
 
@@ -377,7 +382,7 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
 ipcMain.on('get-actions',    e          => e.reply('actions-data',  actionsData));
 ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); });
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
-ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined) registerShortcuts(); });
+ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined || data.shortcutsEnabledMap !== undefined) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
 ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(true, true); });
 ipcMain.on('check-updates', () => { try { autoUpdater.checkForUpdates(); } catch {} });
@@ -401,7 +406,9 @@ function registerShortcuts() {
   globalShortcut.unregisterAll();
   if (!settings.shortcutsEnabled) return;
   const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', ...(settings.shortcuts || {}) };
-  globalShortcut.register(sc.cancel, () => {
+  const en = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
+
+  if (en.cancel) globalShortcut.register(sc.cancel, () => {
     const ids = Object.keys(timers);
     if (!ids.length) return;
     const msg = ids.length > 1 ? `Annuler les ${ids.length} timers en cours ?` : 'Annuler le timer en cours ?';
@@ -420,7 +427,8 @@ function registerShortcuts() {
     ipcMain.once('popup-cancel',  () => { if (!popup.isDestroyed()) popup.close(); });
     popup.on('blur', () => { if (!popup.isDestroyed()) popup.close(); });
   });
-  globalShortcut.register(sc.pause, () => {
+
+  if (en.pause) globalShortcut.register(sc.pause, () => {
     const ids = Object.keys(timers);
     if (!ids.length) return;
     const id = parseInt(ids[0]);
@@ -437,7 +445,8 @@ function registerShortcuts() {
       n.show();
     }
   });
-  globalShortcut.register(sc.toggle, () => {
+
+  if (en.toggle) globalShortcut.register(sc.toggle, () => {
     if (!mainWindow) return;
     if (mainWindow.isVisible()) mainWindow.hide();
     else { mainWindow.show(); mainWindow.focus(); }

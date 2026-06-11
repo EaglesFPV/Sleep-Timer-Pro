@@ -486,15 +486,24 @@ select.f-input option{background:var(--bg-card2);}
       </div>
       <div class="set-item">
         <div><div class="set-name">Annuler le timer</div><div class="set-desc">Annule le timer actif depuis n'importe où</div></div>
-        <div id="sc-cancel" class="sc-badge" onclick="startShortcutCapture('cancel')">Ctrl+Alt+S</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="toggle on" id="tgl-sc-cancel" onclick="toggleShortcutEnabled('cancel')" title="Activer/désactiver ce raccourci"></div>
+          <div id="sc-cancel" class="sc-badge" onclick="startShortcutCapture('cancel')">Ctrl+Alt+S</div>
+        </div>
       </div>
       <div class="set-item">
         <div><div class="set-name">Pause / Reprendre</div><div class="set-desc">Met en pause ou reprend le timer actif</div></div>
-        <div id="sc-pause" class="sc-badge" onclick="startShortcutCapture('pause')">Ctrl+Alt+P</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="toggle on" id="tgl-sc-pause" onclick="toggleShortcutEnabled('pause')" title="Activer/désactiver ce raccourci"></div>
+          <div id="sc-pause" class="sc-badge" onclick="startShortcutCapture('pause')">Ctrl+Alt+P</div>
+        </div>
       </div>
       <div class="set-item">
         <div><div class="set-name">Afficher / Masquer</div><div class="set-desc">Ouvre ou réduit la fenêtre dans le tray</div></div>
-        <div id="sc-toggle" class="sc-badge" onclick="startShortcutCapture('toggle')">Ctrl+Alt+O</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="toggle on" id="tgl-sc-toggle" onclick="toggleShortcutEnabled('toggle')" title="Activer/désactiver ce raccourci"></div>
+          <div id="sc-toggle" class="sc-badge" onclick="startShortcutCapture('toggle')">Ctrl+Alt+O</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1082,6 +1091,21 @@ function applySettings() {
   const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
   const sc = { ...defaults, ...(settings.shortcuts || {}) };
   ['cancel','pause','toggle'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
+  const scEnabled = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
+  ['cancel','pause','toggle'].forEach(a => {
+    const tgl = document.getElementById('tgl-sc-' + a);
+    if (tgl) tgl.className = 'toggle' + (scEnabled[a] ? ' on' : '');
+    const badge = document.getElementById('sc-' + a);
+    if (badge) badge.style.opacity = scEnabled[a] ? '1' : '0.45';
+  });
+}
+
+function toggleShortcutEnabled(action) {
+  const map = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
+  map[action] = !map[action];
+  settings.shortcutsEnabledMap = map;
+  ipc('save-settings', { shortcutsEnabledMap: map });
+  applySettings();
 }
 
 let _capturingShortcut = null;
