@@ -506,6 +506,29 @@ select.f-input option{background:var(--bg-card2);}
         </div>
       </div>
     </div>
+    <div class="set-card">
+      <div class="f-lbl" style="margin-bottom:10px;">Écran noir</div>
+      <div class="set-item">
+        <div><div class="set-name">Mode extinction</div><div class="set-desc">Éteint physiquement l'écran au lieu d'afficher une fenêtre noire</div></div>
+        <div class="toggle" id="tgl-screenBlackMode" onclick="togScreenMode()"></div>
+      </div>
+      <div class="set-item">
+        <div><div class="set-name">Raccourci clavier</div><div class="set-desc">Activer / désactiver l'écran noir depuis n'importe où</div></div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="toggle" id="tgl-sc-blackscreen" onclick="toggleShortcutEnabled('blackscreen')" title="Activer/désactiver ce raccourci"></div>
+          <div id="sc-blackscreen" class="sc-badge" onclick="startShortcutCapture('blackscreen')">Ctrl+Alt+N</div>
+        </div>
+      </div>
+      <div class="set-item" style="border-bottom:none;">
+        <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="ipc('toggle-black-screen')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" style="width:15px;height:15px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            Activer l'écran noir maintenant
+          </button>
+          <div style="font-size:11px;color:var(--text-3);text-align:center;">Double clic gauche ou droit sur l'écran noir pour le désactiver</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 </div>
@@ -1088,13 +1111,16 @@ function applySettings() {
   if (mtEl) mtEl.value = settings.maxTimers || 10;
   const s = settings.addTimeAmount || 600;
   const ah = document.getElementById('in-addH'); if (ah) { ah.value = Math.floor(s / 3600); document.getElementById('in-addM').value = Math.floor((s % 3600) / 60); document.getElementById('in-addS').value = s % 60; }
-  const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
+  const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', blackscreen:'CommandOrControl+Alt+N' };
   const sc = { ...defaults, ...(settings.shortcuts || {}) };
-  ['cancel','pause','toggle'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
+  ['cancel','pause','toggle','blackscreen'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
   // FIX #2 — griser les lignes individuelles si le toggle global est OFF
   const globalOn  = settings.shortcutsEnabled;
-  const scEnabled = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
-  ['cancel','pause','toggle'].forEach(a => {
+  const scEnabled = { cancel:true, pause:true, toggle:true, blackscreen:false, ...(settings.shortcutsEnabledMap || {}) };
+  // Mode écran noir
+  const tglSBM = document.getElementById('tgl-screenBlackMode');
+  if (tglSBM) tglSBM.className = 'toggle' + (settings.screenBlackMode ? ' on' : '');
+  ['cancel','pause','toggle','blackscreen'].forEach(a => {
     const tgl   = document.getElementById('tgl-sc-' + a);
     const badge = document.getElementById('sc-' + a);
     const row   = document.getElementById('sc-row-' + a);
@@ -1178,6 +1204,12 @@ function saveHmsSetting(key, prefix) {
 function saveWaitMusicMax() {
   settings.waitForMusicMaxSecs = (parseInt(document.getElementById('in-waitMusicMaxH').value) || 0) * 3600 + (parseInt(document.getElementById('in-waitMusicMaxM').value) || 0) * 60;
   ipc('save-settings', settings);
+}
+function togScreenMode() {
+  settings.screenBlackMode = !settings.screenBlackMode;
+  ipc('save-settings', { screenBlackMode: settings.screenBlackMode });
+  const tgl = document.getElementById('tgl-screenBlackMode');
+  if (tgl) tgl.className = 'toggle' + (settings.screenBlackMode ? ' on' : '');
 }
 function installUpdate() {
   const btn = document.getElementById('updateBtn');

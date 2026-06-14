@@ -8,6 +8,8 @@ let mainWindow;
 let tray;
 let timers = {};
 let nextTimerId = 1;
+let screenBlackWindow = null;
+let screenBlackMode = false; // false = fenêtre noire, true = extinction écran
 
 const DATA_FILE     = path.join(app.getPath('userData'), 'actions_v1.json');
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings_v1.json');
@@ -125,6 +127,60 @@ function createWindow() {
   });
 }
 
+function turnOffMonitor() {
+  // Éteint l'écran via PowerShell (méthode WinAPI SendMessage)
+  try {
+    const ps = `
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class Monitor {
+  [DllImport("user32.dll")]
+  public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+}
+"@
+[Monitor]::SendMessage([System.IntPtr]::new(-1), 0x0112, [System.IntPtr]::new(0xF170), [System.IntPtr]::new(2)) | Out-Null
+`;
+    const tmp = path.join(app.getPath('temp'), 'stp_screen_off.ps1');
+    fs.writeFileSync(tmp, ps, 'utf8');
+    spawn('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', tmp], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+  } catch {}
+}
+
+function toggleBlackScreen() {
+  // Si l'écran est déjà éteint / noir, on le rallume
+  if (screenBlackWindow && !screenBlackWindow.isDestroyed()) {
+    screenBlackWindow.close();
+    screenBlackWindow = null;
+    return;
+  }
+  if (screenBlackMode) {
+    // Mode extinction écran réel
+    turnOffMonitor();
+    // Double clic ou touche pour rallumer (l'utilisateur bougera la souris naturellement)
+  } else {
+    // Mode fenêtre noire fullscreen
+    screenBlackWindow = new BrowserWindow({
+      fullscreen: true,
+      frame: false,
+      transparent: false,
+      backgroundColor: '#000000',
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      webPreferences: { nodeIntegration: true, contextIsolation: false }
+    });
+    screenBlackWindow.loadURL('data:text/html,<html style="background:#000;margin:0"></html>');
+    // Double clic gauche ou droit pour fermer
+    screenBlackWindow.webContents.on('did-finish-load', () => {
+      screenBlackWindow.webContents.executeJavaScript(`
+        document.addEventListener('dblclick', () => { require('electron').ipcRenderer.send('close-black-screen'); });
+        document.addEventListener('contextmenu', (e) => { e.preventDefault(); require('electron').ipcRenderer.send('close-black-screen'); });
+      `);
+    });
+    screenBlackWindow.on('closed', () => { screenBlackWindow = null; });
+  }
+}
+
 function createTray() {
   try {
     const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.ico')).resize({ width: 16, height: 16 });
@@ -175,6 +231,8 @@ function updateTrayMenu() {
     { type: 'separator' },
     { label: 'Ouvrir',       click: () => { mainWindow.show(); mainWindow.focus(); } },
     { label: 'Tout annuler', enabled: activeTimers.length > 0, click: () => cancelAllTimers() },
+    { type: 'separator' },
+    { label: screenBlackWindow ? '💡 Rallumer l\'écran' : '🌑 Éteindre l\'écran', click: () => toggleBlackScreen() },
     { type: 'separator' },
     { label: 'Quitter', click: () => { Object.keys(timers).forEach(id => clearInterval(timers[id].interval)); app.quit(); } }
   ]);
@@ -382,7 +440,14 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
 ipcMain.on('get-actions',    e          => e.reply('actions-data',  actionsData));
 ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); });
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
-ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined || data.shortcutsEnabledMap !== undefined) registerShortcuts(); });
+ipcMain.on('save-settings',  (e, data)  => {
+  settings = { ...settings, ...data };
+  saveSettings();
+  if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined || data.shortcutsEnabledMap !== undefined) registerShortcuts();
+  if (data.screenBlackMode !== undefined) screenBlackMode = data.screenBlackMode;
+});
+ipcMain.on('toggle-black-screen', () => toggleBlackScreen());
+ipcMain.on('close-black-screen',  () => { if (screenBlackWindow && !screenBlackWindow.isDestroyed()) { screenBlackWindow.close(); screenBlackWindow = null; } });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
 ipcMain.on('update-install', () => {
   // Détacher tous les listeners de fermeture pour éviter le "ne répond pas"
@@ -418,8 +483,8 @@ app.whenReady().then(() => {
 function registerShortcuts() {
   globalShortcut.unregisterAll();
   if (!settings.shortcutsEnabled) return;
-  const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', ...(settings.shortcuts || {}) };
-  const en = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
+  const sc = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', blackscreen:'CommandOrControl+Alt+N', ...(settings.shortcuts || {}) };
+  const en = { cancel:true, pause:true, toggle:true, blackscreen:false, ...(settings.shortcutsEnabledMap || {}) };
 
   if (en.cancel) globalShortcut.register(sc.cancel, () => {
     const ids = Object.keys(timers);
@@ -464,6 +529,8 @@ function registerShortcuts() {
     if (mainWindow.isVisible()) mainWindow.hide();
     else { mainWindow.show(); mainWindow.focus(); }
   });
+
+  if (en.blackscreen) globalShortcut.register(sc.blackscreen, () => toggleBlackScreen());
 }
 
 app.on('window-all-closed', () => app.quit());
