@@ -484,21 +484,21 @@ select.f-input option{background:var(--bg-card2);}
         <div><div class="set-name">Activer les raccourcis</div><div class="set-desc">Raccourcis clavier globaux actifs en arrière-plan</div></div>
         <div class="toggle on" id="tgl-shortcutsEnabled" onclick="togSet('shortcutsEnabled','tgl-shortcutsEnabled')"></div>
       </div>
-      <div class="set-item">
+      <div class="set-item" id="sc-row-cancel">
         <div><div class="set-name">Annuler le timer</div><div class="set-desc">Annule le timer actif depuis n'importe où</div></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="toggle on" id="tgl-sc-cancel" onclick="toggleShortcutEnabled('cancel')" title="Activer/désactiver ce raccourci"></div>
           <div id="sc-cancel" class="sc-badge" onclick="startShortcutCapture('cancel')">Ctrl+Alt+S</div>
         </div>
       </div>
-      <div class="set-item">
+      <div class="set-item" id="sc-row-pause">
         <div><div class="set-name">Pause / Reprendre</div><div class="set-desc">Met en pause ou reprend le timer actif</div></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="toggle on" id="tgl-sc-pause" onclick="toggleShortcutEnabled('pause')" title="Activer/désactiver ce raccourci"></div>
           <div id="sc-pause" class="sc-badge" onclick="startShortcutCapture('pause')">Ctrl+Alt+P</div>
         </div>
       </div>
-      <div class="set-item">
+      <div class="set-item" id="sc-row-toggle">
         <div><div class="set-name">Afficher / Masquer</div><div class="set-desc">Ouvre ou réduit la fenêtre dans le tray</div></div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="toggle on" id="tgl-sc-toggle" onclick="toggleShortcutEnabled('toggle')" title="Activer/désactiver ce raccourci"></div>
@@ -1091,16 +1091,27 @@ function applySettings() {
   const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
   const sc = { ...defaults, ...(settings.shortcuts || {}) };
   ['cancel','pause','toggle'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
+  // FIX #2 — griser les lignes individuelles si le toggle global est OFF
+  const globalOn  = settings.shortcutsEnabled;
   const scEnabled = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
   ['cancel','pause','toggle'].forEach(a => {
-    const tgl = document.getElementById('tgl-sc-' + a);
-    if (tgl) tgl.className = 'toggle' + (scEnabled[a] ? ' on' : '');
+    const tgl   = document.getElementById('tgl-sc-' + a);
     const badge = document.getElementById('sc-' + a);
-    if (badge) badge.style.opacity = scEnabled[a] ? '1' : '0.45';
+    const row   = document.getElementById('sc-row-' + a);
+    // Griser/bloquer toute la ligne si global OFF
+    if (row) {
+      row.style.opacity       = globalOn ? '1'    : '0.4';
+      row.style.pointerEvents = globalOn ? ''     : 'none';
+    }
+    // État individuel (toggle + badge) selon global ET individuel
+    const on = globalOn && scEnabled[a];
+    if (tgl)   tgl.className       = 'toggle' + (on ? ' on' : '');
+    if (badge) badge.style.opacity = on ? '1' : '0.45';
   });
 }
 
 function toggleShortcutEnabled(action) {
+  if (!settings.shortcutsEnabled) return; // guard — global OFF
   const map = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
   map[action] = !map[action];
   settings.shortcutsEnabledMap = map;
@@ -1110,6 +1121,7 @@ function toggleShortcutEnabled(action) {
 
 let _capturingShortcut = null;
 function startShortcutCapture(action) {
+  if (!settings.shortcutsEnabled) return; // guard — global OFF
   if (_capturingShortcut) { document.getElementById('sc-' + _capturingShortcut).classList.remove('capturing'); applySettings(); }
   _capturingShortcut = action;
   const el = document.getElementById('sc-' + action);

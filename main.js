@@ -394,6 +394,9 @@ ipcMain.on('execute-now', (e, type) => {
   }).then(r => { if (r.response === 1) executeAction(type, null); });
 });
 
+// FIX #1 — Corrige "electron.app.SleepTimerPro" dans les notifications Windows
+app.setAppUserModelId('SleepTimer Pro');
+
 app.whenReady().then(() => {
   loadData();
   createWindow();
