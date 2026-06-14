@@ -384,7 +384,17 @@ ipcMain.on('save-actions',   (e, data)  => { actionsData = data; saveActions(); 
 ipcMain.on('get-settings',   e          => e.reply('settings-data', settings));
 ipcMain.on('save-settings',  (e, data)  => { settings = { ...settings, ...data }; saveSettings(); if (data.shortcuts !== undefined || data.shortcutsEnabled !== undefined || data.shortcutsEnabledMap !== undefined) registerShortcuts(); });
 ipcMain.on('get-app-info',   e          => e.reply('app-info', { version: app.getVersion(), repo: 'https://github.com/EaglesFPV/Sleep-Timer-Pro' }));
-ipcMain.on('update-install', () => { autoUpdater.quitAndInstall(true, true); });
+ipcMain.on('update-install', () => {
+  // Détacher tous les listeners de fermeture pour éviter le "ne répond pas"
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.removeAllListeners('close');
+    mainWindow.hide();
+  }
+  // Désactiver les raccourcis globaux
+  globalShortcut.unregisterAll();
+  // isSilent=true : pas d'écran installateur, isForceRunAfter=true : relance l'app après
+  setImmediate(() => autoUpdater.quitAndInstall(true, true));
+});
 ipcMain.on('check-updates', () => { try { autoUpdater.checkForUpdates(); } catch {} });
 
 ipcMain.on('execute-now', (e, type) => {
