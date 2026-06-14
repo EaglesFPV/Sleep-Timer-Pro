@@ -1103,10 +1103,9 @@ function applySettings() {
       row.style.opacity       = globalOn ? '1'    : '0.4';
       row.style.pointerEvents = globalOn ? ''     : 'none';
     }
-    // État individuel (toggle + badge) selon global ET individuel
-    const on = globalOn && scEnabled[a];
-    if (tgl)   tgl.className       = 'toggle' + (on ? ' on' : '');
-    if (badge) badge.style.opacity = on ? '1' : '0.45';
+    // État individuel : conserve l'apparence réelle, indépendamment du global
+    if (tgl)   tgl.className       = 'toggle' + (scEnabled[a] ? ' on' : '');
+    if (badge) badge.style.opacity = scEnabled[a] ? '1' : '0.45';
   });
 }
 

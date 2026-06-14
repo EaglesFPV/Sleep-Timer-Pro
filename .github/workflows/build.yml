@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set version to 0.0.0
+        run: npm version 0.0.0 --no-git-tag-version
+
       - name: Install dependencies
         run: npm install
 
@@ -30,5 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SleepTimerPro-Windows
-          path: dist/SleepTimer-Pro-Setup-*.exe
+          path: dist/SleepTimer-Pro-Setup-0.0.0.exe
           retention-days: 30
+          if-no-files-found: error
+          compression-level: 0
