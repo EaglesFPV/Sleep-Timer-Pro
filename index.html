@@ -88,6 +88,11 @@ body{font-family:'Outfit',sans-serif;background:var(--bg-main);color:var(--text-
 .btn-danger{color:var(--danger);border-color:rgba(239,91,110,.2);}
 .btn-danger:hover{background:rgba(239,91,110,.1);border-color:rgba(239,91,110,.4);}
 .timers-list{display:flex;flex-direction:column;gap:12px;}
+.hist-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .15s;margin-bottom:-1px;}
+.hist-tab:hover{color:var(--text-1);}
+.hist-tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.tc.drag-over-tc{border-top:2px solid var(--accent);opacity:.7;}
+.tc.dragging-tc{opacity:.35;}
 .tc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:border-color .2s;}
 .tc.active-tc{border-color:var(--border-hi);}
 .tc-bar{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
@@ -287,6 +292,7 @@ select.f-input option{background:var(--bg-card2);}
     <div class="nav" id="nav-history" data-page="p-history" data-locked="true" onclick="navClick(this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="#FFB347" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>Historique
     </div>
+
     <div class="nav" id="nav-settings" data-page="p-settings" data-locked="true" onclick="navClick(this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="#9B7FE8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Paramètres
     </div>
@@ -391,20 +397,39 @@ select.f-input option{background:var(--bg-card2);}
   <div class="page" id="p-manage">
     <div class="sh">
       <div><div class="sh-title">Mes actions</div></div>
-      <button class="btn btn-primary" onclick="openModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle action
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="exportActions()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exporter
+        </button>
+        <button class="btn" onclick="importActions()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importer
+        </button>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle action
+        </button>
+      </div>
     </div>
     <div class="manage-list" id="manageList"></div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="onImportFile(this)">
   </div>
   <div class="page" id="p-history">
     <div class="sh">
-      <div><div class="sh-title">Historique</div></div>
-      <button class="btn btn-danger" onclick="clearHist()">
+      <div><div class="sh-title">Historique</div><div class="sh-sub" id="histCount"></div></div>
+      <button class="btn btn-danger" id="clearHistBtn" onclick="clearHist()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>Effacer
       </button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:7px;" id="histList"></div>
+    <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:0;">
+      <button class="hist-tab on" id="tab-hist" onclick="switchHistTab('hist')">Historique</button>
+      <button class="hist-tab" id="tab-stats" onclick="switchHistTab('stats')">Statistiques</button>
+    </div>
+    <div id="hist-panel">
+      <div style="display:flex;flex-direction:column;gap:7px;" id="histList"></div>
+    </div>
+    <div id="stats-panel" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;" id="statsCards"></div>
+      <div class="set-card" id="statsDetails"></div>
+    </div>
   </div>
   <div class="page" id="p-settings">
     <div class="sh-title" style="margin-bottom:4px;">Paramètres</div>
@@ -564,7 +589,7 @@ select.f-input option{background:var(--bg-card2);}
         </div>
         <div class="set-item" style="padding:10px 0;border-bottom:none;">
           <div><div class="set-name">Code source</div></div>
-          <a href="https://github.com/EaglesFPV/Sleep-Timer-Pro" style="font-size:13px;color:var(--accent);text-decoration:none;">GitHub</a>
+          <a href="#" onclick="require('electron').shell.openExternal('https://github.com/EaglesFPV/Sleep-Timer-Pro');return false;" style="font-size:13px;color:var(--accent);text-decoration:none;">GitHub</a>
         </div>
       </div>
     </div>
@@ -670,7 +695,7 @@ ipcRenderer.on('actions-data', (e, d) => { actions = d; renderActions(); renderM
 ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); });
 
 ipcRenderer.on('timer-started', (e, d) => {
-  activeTimers[d.id] = { id: d.id, remaining: d.seconds, total: d.seconds, name: d.actionName, icon: d.actionIcon || 'clock', type: d.type, color: d.color || COLORS[0], paused: false };
+  activeTimers[d.id] = { id: d.id, remaining: d.seconds, total: d.seconds, name: d.actionName, icon: d.actionIcon || 'clock', type: d.type, color: d.color || COLORS[0], paused: false, startedAt: Date.now() };
   renderTimerCards(); updateSidebar(); updateStatus();
   showPage('p-timers');
   notif('play', `Timer démarré : ${d.actionName}`);
@@ -704,7 +729,7 @@ ipcRenderer.on('action-executing', (e, { type, timerId }) => {
   el.setAttribute('stroke', TYPE_COLORS[type] || '#FFB347');
   document.getElementById('execTitleText').textContent = names[type] || type;
   document.getElementById('execOv').classList.add('open');
-  const timerData = timerId && activeTimers[timerId] ? { seconds: activeTimers[timerId].total, actionName: activeTimers[timerId].name, actionIcon: activeTimers[timerId].icon, type: activeTimers[timerId].type, color: activeTimers[timerId].color } : null;
+  const timerData = timerId && activeTimers[timerId] ? { seconds: activeTimers[timerId].total, actionName: activeTimers[timerId].name, actionIcon: activeTimers[timerId].icon, type: activeTimers[timerId].type, color: activeTimers[timerId].color, _startedAt: activeTimers[timerId].startedAt } : null;
   delete activeTimers[timerId];
   const remaining = Object.keys(activeTimers).length;
   if (settings.deleteOnFinish || remaining === 0) {
@@ -715,7 +740,7 @@ ipcRenderer.on('action-executing', (e, { type, timerId }) => {
     if (card) card.remove();
   }
   updateSidebar(); updateStatus();
-  addHist(type, timerData);
+  addHist(type, timerData, timerData?._startedAt);
 });
 ipcRenderer.on('action-error',  (e, msg) => { document.getElementById('execOv').classList.remove('open'); notif('warn', 'Erreur : ' + msg); });
 ipcRenderer.on('action-done',   ()        => { document.getElementById('execOv').classList.remove('open'); });
@@ -794,7 +819,7 @@ ipcRenderer.on('update-downloaded', (e, v) => {
   if (sub)    sub.textContent = `v${v} téléchargée — cliquez pour installer`;
   if (btn)    btn.style.display = 'inline-flex';
 });
-buildIconGrid(); buildColorRow(); renderManage(); renderHist();
+buildIconGrid(); buildColorRow(); renderManage(); renderHist(); initTimerDrag();
 const verEl = document.getElementById('appVersion');
 if (verEl) verEl.textContent = APP_VERSION;
 loadSbOrder(); initSbDrag(); showPage('p-actions');
@@ -803,6 +828,7 @@ loadSbOrder(); initSbDrag(); showPage('p-actions');
 function navClick(el) {
   if (document.getElementById('sidebar').classList.contains('edit-mode')) return;
   showPage(el.dataset.page);
+  if (el.dataset.page === 'p-history') { switchHistTab(document.getElementById('tab-hist')?.classList.contains('on') ? 'hist' : 'stats'); }
 }
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -898,7 +924,7 @@ function renderTimerCards() {
 }
 function buildTimerCard(t) {
   const el = document.createElement('div');
-  el.className = 'tc active-tc'; el.dataset.tid = t.id;
+  el.className = 'tc active-tc'; el.dataset.tid = t.id; el.setAttribute('draggable', 'true');
   el.innerHTML = `<div class="tc-bar"></div>
     <div class="tc-top">
       <div class="tc-icon" style="background:${t.color}22">
@@ -1080,24 +1106,171 @@ function saveAction() {
 }
 function deleteAction(id) { actions = actions.filter(a => a.id !== id); ipc('save-actions', actions); renderActions(); renderManage(); notif('trash', 'Action supprimée'); }
 
-function addHist(type, timerData) {
-  history.unshift({ type, date: new Date().toISOString(), timerData: timerData || null });
-  if (history.length > 50) history.pop();
+function addHist(type, timerData, startedAt) {
+  const entry = {
+    type,
+    date:      new Date().toISOString(),
+    startedAt: startedAt || null,
+    timerData: timerData || null,
+    realDuration: startedAt ? Math.round((Date.now() - startedAt) / 1000) : (timerData?.seconds || null)
+  };
+  history.unshift(entry);
+  if (history.length > 200) history.pop();
   localStorage.setItem('stp2_hist', JSON.stringify(history));
   renderHist();
 }
-function clearHist() { history = []; localStorage.setItem('stp2_hist', '[]'); renderHist(); }
+function clearHist() { history = []; localStorage.setItem('stp2_hist', '[]'); renderHist(); renderStats(); }
+function switchHistTab(tab) {
+  const isHist = tab === 'hist';
+  document.getElementById('tab-hist').classList.toggle('on', isHist);
+  document.getElementById('tab-stats').classList.toggle('on', !isHist);
+  document.getElementById('hist-panel').style.display   = isHist ? '' : 'none';
+  document.getElementById('stats-panel').style.display  = isHist ? 'none' : '';
+  document.getElementById('clearHistBtn').style.display = isHist ? '' : 'none';
+  if (!isHist) renderStats();
+}
 function renderHist() {
   const el = document.getElementById('histList');
+  const countEl = document.getElementById('histCount');
+  if (countEl) countEl.textContent = history.length ? `${history.length} entrée(s)` : '';
   if (!history.length) { el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg><p>Aucun historique.</p></div>`; return; }
   el.innerHTML = history.map((h, i) => {
-    const d   = new Date(h.date);
-    const col = TYPE_COLORS[h.type] || '#FFB347';
-    const btn = h.timerData ? `<button class="btn" style="margin-left:auto;flex-shrink:0" onclick='relaunchHist(${i})'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Relancer</button>` : '';
-    return `<div class="hist-item"><div class="hist-icon" style="background:${col}22"><svg viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">${TYPE_ICONS_SVG[h.type] || ICONS.zap}</svg></div><div style="flex:1"><div class="hist-name">${typeName(h.type)}${h.timerData ? ` — ${fmtDur(h.timerData.seconds)}` : ''}${h.timerData?.actionName && h.timerData.actionName !== typeName(h.type) ? ` · ${h.timerData.actionName}` : ''}</div><div class="hist-time">${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div></div>${btn}</div>`;
+    const dEnd   = new Date(h.date);
+    const col    = TYPE_COLORS[h.type] || '#FFB347';
+    const btn    = h.timerData ? `<button class="btn" style="margin-left:auto;flex-shrink:0;flex-shrink:0" onclick='relaunchHist(${i})'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>Relancer</button>` : '';
+    const name   = h.timerData?.actionName || typeName(h.type);
+    const durPrev = h.timerData?.seconds ? `Prévu : ${fmtDur(h.timerData.seconds)}` : '';
+    const durReal = h.realDuration        ? `Réel : ${fmtDur(h.realDuration)}`      : '';
+    const started = h.startedAt           ? `Début : ${new Date(h.startedAt).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}` : '';
+    const ended   = `Fin : ${dEnd.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})}`;
+    const dateStr = dEnd.toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'});
+    const details = [durPrev, durReal, started, ended].filter(Boolean).join(' · ');
+    return `<div class="hist-item"><div class="hist-icon" style="background:${col}22"><svg viewBox="0 0 24 24" fill="none" stroke="${col}" stroke-linecap="round" stroke-linejoin="round">${TYPE_ICONS_SVG[h.type] || ICONS.zap}</svg></div><div style="flex:1;min-width:0"><div class="hist-name">${name} <span style="font-size:10px;font-weight:700;letter-spacing:.5px;padding:1px 6px;border-radius:4px;background:${col}22;color:${col};text-transform:uppercase;">${typeName(h.type)}</span></div><div class="hist-time" style="margin-top:3px;">${dateStr}</div><div class="hist-time" style="margin-top:1px;font-size:10px;">${details}</div></div>${btn}</div>`;
   }).join('');
 }
 function relaunchHist(i) { const h = history[i]; if (!h?.timerData) return; startTimerSingle(h.timerData); notif('play', `Timer relancé : ${h.timerData.actionName}`); }
+
+// ── IMPORT / EXPORT ──────────────────────────────────────────────────────────
+function exportActions() {
+  const data = { version: 1, exported: new Date().toISOString(), actions };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `sleeptimer-actions-${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  notif('ok', `${actions.length} action(s) exportée(s)`);
+}
+function importActions() { document.getElementById('importFileInput').click(); }
+function onImportFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = Array.isArray(data) ? data : (data.actions || []);
+      if (!imported.length) { notif('warn', 'Aucune action trouvée dans le fichier'); return; }
+      // Fusionner : éviter les doublons par nom
+      const existingNames = new Set(actions.map(a => a.name.toLowerCase()));
+      const toAdd = imported.filter(a => !existingNames.has(a.name?.toLowerCase()));
+      const newActions = [...actions, ...toAdd.map(a => ({ ...a, id: Date.now() + Math.random() }))];
+      actions = newActions;
+      ipc('save-actions', actions);
+      renderActions(); renderManage();
+      notif('ok', `${toAdd.length} action(s) importée(s)${imported.length - toAdd.length ? `, ${imported.length - toAdd.length} doublon(s) ignoré(s)` : ''}`);
+    } catch { notif('warn', 'Fichier invalide'); }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── STATISTIQUES ─────────────────────────────────────────────────────────────
+function computeStats() {
+  const now      = new Date();
+  const thisMonth = now.getMonth();
+  const thisYear  = now.getFullYear();
+  const typeCount = {}, typeDur = {};
+  let totalDur = 0, totalCount = 0, monthDur = 0, monthCount = 0;
+  history.forEach(h => {
+    const d   = new Date(h.date);
+    const dur = h.realDuration || h.timerData?.seconds || 0;
+    typeCount[h.type] = (typeCount[h.type] || 0) + 1;
+    typeDur[h.type]   = (typeDur[h.type]   || 0) + dur;
+    totalDur   += dur; totalCount++;
+    if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) { monthDur += dur; monthCount++; }
+  });
+  const topType   = Object.entries(typeCount).sort((a,b) => b[1]-a[1])[0];
+  const topAction = (() => {
+    const ac = {}; history.forEach(h => { const n = h.timerData?.actionName || typeName(h.type); ac[n] = (ac[n]||0)+1; });
+    return Object.entries(ac).sort((a,b) => b[1]-a[1])[0];
+  })();
+  return { totalDur, totalCount, monthDur, monthCount, typeCount, typeDur, topType, topAction };
+}
+function renderStats() {
+  const s   = computeStats();
+  const col = '#3EC9A7';
+  document.getElementById('statsCards').innerHTML = [
+    { label:'Ce mois-ci',      val: fmtDur(s.monthDur),   sub: `${s.monthCount} exécution(s)`,        color:'#5B8DEF' },
+    { label:'Total historique', val: fmtDur(s.totalDur),  sub: `${s.totalCount} exécution(s)`,        color:'#9B7FE8' },
+    { label:'Action favorite', val: s.topAction?.[0] || '—', sub: s.topAction ? `${s.topAction[1]}×` : '', color:'#F0A050' },
+    { label:'Type favori',     val: s.topType ? typeName(s.topType[0]) : '—', sub: s.topType ? `${s.topType[1]}×` : '', color:'#EF5B6E' },
+  ].map(c => `<div class="set-card" style="padding:16px;"><div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">${c.label}</div><div style="font-size:22px;font-weight:800;color:${c.color};">${c.val}</div><div style="font-size:11px;color:var(--text-2);margin-top:2px;">${c.sub}</div></div>`).join('');
+
+  const byType = Object.entries(s.typeDur).sort((a,b) => b[1]-a[1]);
+  const maxDur = byType[0]?.[1] || 1;
+  document.getElementById('statsDetails').innerHTML = byType.length ? `
+    <div class="f-lbl" style="margin-bottom:12px;">Temps par type d'action</div>
+    ${byType.map(([type, dur]) => {
+      const c = TYPE_COLORS[type] || '#FFB347';
+      const pct = Math.round(dur / maxDur * 100);
+      return `<div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:12px;font-weight:700;">${typeName(type)}</span>
+          <span style="font-size:12px;color:var(--text-2);">${fmtDur(dur)} · ${s.typeCount[type]}×</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${c};border-radius:3px;transition:width .4s;"></div>
+        </div>
+      </div>`;
+    }).join('')}` : '<div style="color:var(--text-3);font-size:13px;text-align:center;padding:20px;">Aucune donnée encore.</div>';
+}
+
+// ── DRAG & DROP TIMERS ACTIFS ─────────────────────────────────────────────────
+let dragTid = null;
+function initTimerDrag() {
+  const list = document.getElementById('timersList');
+  list.addEventListener('dragstart', e => {
+    const tc = e.target.closest('.tc[data-tid]'); if (!tc) return;
+    dragTid = tc.dataset.tid;
+    tc.classList.add('dragging-tc');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  list.addEventListener('dragend', e => {
+    const tc = e.target.closest('.tc[data-tid]'); if (!tc) return;
+    tc.classList.remove('dragging-tc');
+    list.querySelectorAll('.tc').forEach(el => el.classList.remove('drag-over-tc'));
+  });
+  list.addEventListener('dragover', e => {
+    e.preventDefault();
+    const tc = e.target.closest('.tc[data-tid]');
+    list.querySelectorAll('.tc').forEach(el => el.classList.remove('drag-over-tc'));
+    if (tc && tc.dataset.tid !== dragTid) tc.classList.add('drag-over-tc');
+  });
+  list.addEventListener('drop', e => {
+    e.preventDefault();
+    const tc = e.target.closest('.tc[data-tid]');
+    if (!tc || tc.dataset.tid === dragTid) return;
+    const dragging = list.querySelector(`.tc[data-tid="${dragTid}"]`);
+    if (!dragging) return;
+    const items  = [...list.querySelectorAll('.tc[data-tid]')];
+    const idxSrc = items.indexOf(dragging);
+    const idxDst = items.indexOf(tc);
+    if (idxSrc < idxDst) list.insertBefore(dragging, tc.nextSibling);
+    else list.insertBefore(dragging, tc);
+    list.querySelectorAll('.tc').forEach(el => el.classList.remove('drag-over-tc'));
+  });
+}
 
 function applySettings() {
   const map = { notifEnabled:'tgl-notif', minimizeToTray:'tgl-tray', deleteOnFinish:'tgl-deleteFinish', waitForMusic:'tgl-waitMusic', shortcutsEnabled:'tgl-shortcutsEnabled' };
