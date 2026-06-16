@@ -486,6 +486,10 @@ select.f-input option{background:var(--bg-card2);}
         <div class="toggle on" id="tgl-tray" onclick="togSet('minimizeToTray','tgl-tray')"></div>
       </div>
       <div class="set-item">
+        <div><div class="set-name">Démarrage automatique avec Windows</div><div class="set-desc">Lance SleepTimer Pro au démarrage de Windows</div></div>
+        <div class="toggle" id="tgl-autoLaunch" onclick="toggleAutoLaunch()"></div>
+      </div>
+      <div class="set-item">
         <div><div class="set-name">Supprimer le timer une fois terminé</div><div class="set-desc">Efface l'affichage du timer après exécution de l'action</div></div>
         <div class="toggle on" id="tgl-deleteFinish" onclick="togSet('deleteOnFinish','tgl-deleteFinish')"></div>
       </div>
@@ -531,29 +535,7 @@ select.f-input option{background:var(--bg-card2);}
         </div>
       </div>
     </div>
-    <div class="set-card">
-      <div class="f-lbl" style="margin-bottom:10px;">Écran noir</div>
-      <div class="set-item">
-        <div><div class="set-name">Mode extinction</div><div class="set-desc">Éteint physiquement l'écran au lieu d'afficher une fenêtre noire</div></div>
-        <div class="toggle" id="tgl-screenBlackMode" onclick="togScreenMode()"></div>
-      </div>
-      <div class="set-item">
-        <div><div class="set-name">Raccourci clavier</div><div class="set-desc">Activer / désactiver l'écran noir depuis n'importe où</div></div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="toggle" id="tgl-sc-blackscreen" onclick="toggleShortcutEnabled('blackscreen')" title="Activer/désactiver ce raccourci"></div>
-          <div id="sc-blackscreen" class="sc-badge" onclick="startShortcutCapture('blackscreen')">Ctrl+Alt+N</div>
-        </div>
-      </div>
-      <div class="set-item" style="border-bottom:none;">
-        <div style="width:100%;display:flex;flex-direction:column;gap:8px;">
-          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="ipc('toggle-black-screen')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" style="width:15px;height:15px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            Activer l'écran noir maintenant
-          </button>
-          <div style="font-size:11px;color:var(--text-3);text-align:center;">Double clic gauche ou droit sur l'écran noir pour le désactiver</div>
-        </div>
-      </div>
-    </div>
+
   </div>
 </div>
 </div>
@@ -688,10 +670,11 @@ let actions = [], settings = {
   deleteOnFinish: true, waitForMusic: false, waitForMusicMaxSecs: 0,
   maxTimers: 10, shortcutsEnabled: true, quickTimeButtons: [300,600,900,1800,3600,-300,-600,-900]
 };
-let activeTimers = {}, history = JSON.parse(localStorage.getItem('stp2_hist') || '[]');
+let activeTimers = {}, history = [];
 let editingId = null, selIcon = 'music', selColor = COLORS[0], selCustomType = 'sleep';
 
 ipcRenderer.on('actions-data', (e, d) => { actions = d; renderActions(); renderManage(); });
+ipcRenderer.on('history-data',  (e, d) => { history = d; renderHist(); });
 ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); });
 
 ipcRenderer.on('timer-started', (e, d) => {
@@ -796,7 +779,7 @@ function updateThemeBtn(isLight) {
   if (localStorage.getItem('stp_theme') === 'light') { document.body.classList.add('light'); updateThemeBtn(true); }
 })();
 
-ipc('get-actions'); ipc('get-settings');
+ipc('get-actions'); ipc('get-settings'); ipc('get-history'); ipc('get-auto-launch');
 
 
 ipcRenderer.on('update-available', (e, v) => {
@@ -1116,10 +1099,10 @@ function addHist(type, timerData, startedAt) {
   };
   history.unshift(entry);
   if (history.length > 200) history.pop();
-  localStorage.setItem('stp2_hist', JSON.stringify(history));
+  ipc('save-history', history);
   renderHist();
 }
-function clearHist() { history = []; localStorage.setItem('stp2_hist', '[]'); renderHist(); renderStats(); }
+function clearHist() { history = []; ipc('save-history', history); renderHist(); renderStats(); }
 function switchHistTab(tab) {
   const isHist = tab === 'hist';
   document.getElementById('tab-hist').classList.toggle('on', isHist);
@@ -1284,16 +1267,13 @@ function applySettings() {
   if (mtEl) mtEl.value = settings.maxTimers || 10;
   const s = settings.addTimeAmount || 600;
   const ah = document.getElementById('in-addH'); if (ah) { ah.value = Math.floor(s / 3600); document.getElementById('in-addM').value = Math.floor((s % 3600) / 60); document.getElementById('in-addS').value = s % 60; }
-  const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O', blackscreen:'CommandOrControl+Alt+N' };
+  const defaults = { cancel:'CommandOrControl+Alt+S', pause:'CommandOrControl+Alt+P', toggle:'CommandOrControl+Alt+O' };
   const sc = { ...defaults, ...(settings.shortcuts || {}) };
-  ['cancel','pause','toggle','blackscreen'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
+  ['cancel','pause','toggle'].forEach(a => { const el = document.getElementById('sc-' + a); if (el && !el.classList.contains('capturing')) el.textContent = sc[a].replace('CommandOrControl', 'Ctrl'); });
   // FIX #2 — griser les lignes individuelles si le toggle global est OFF
   const globalOn  = settings.shortcutsEnabled;
-  const scEnabled = { cancel:true, pause:true, toggle:true, blackscreen:false, ...(settings.shortcutsEnabledMap || {}) };
-  // Mode écran noir
-  const tglSBM = document.getElementById('tgl-screenBlackMode');
-  if (tglSBM) tglSBM.className = 'toggle' + (settings.screenBlackMode ? ' on' : '');
-  ['cancel','pause','toggle','blackscreen'].forEach(a => {
+  const scEnabled = { cancel:true, pause:true, toggle:true, ...(settings.shortcutsEnabledMap || {}) };
+  ['cancel','pause','toggle'].forEach(a => {
     const tgl   = document.getElementById('tgl-sc-' + a);
     const badge = document.getElementById('sc-' + a);
     const row   = document.getElementById('sc-row-' + a);
@@ -1378,12 +1358,7 @@ function saveWaitMusicMax() {
   settings.waitForMusicMaxSecs = (parseInt(document.getElementById('in-waitMusicMaxH').value) || 0) * 3600 + (parseInt(document.getElementById('in-waitMusicMaxM').value) || 0) * 60;
   ipc('save-settings', settings);
 }
-function togScreenMode() {
-  settings.screenBlackMode = !settings.screenBlackMode;
-  ipc('save-settings', { screenBlackMode: settings.screenBlackMode });
-  const tgl = document.getElementById('tgl-screenBlackMode');
-  if (tgl) tgl.className = 'toggle' + (settings.screenBlackMode ? ' on' : '');
-}
+
 function installUpdate() {
   const btn = document.getElementById('updateBtn');
   const sub = document.getElementById('updateBannerSub');
@@ -1397,6 +1372,14 @@ function saveMaxTimers(val) {
   ipc('save-settings', settings);
 }
 function togSet(key, tglId) { settings[key] = !settings[key]; ipc('save-settings', settings); applySettings(); }
+
+function toggleAutoLaunch() {
+  ipc('toggle-auto-launch');
+}
+ipcRenderer.on('auto-launch-status', (e, enabled) => {
+  const tgl = document.getElementById('tgl-autoLaunch');
+  if (tgl) tgl.className = 'toggle' + (enabled ? ' on' : '');
+});
 
 let qbEditing = false;
 function toggleQbEdit() {
