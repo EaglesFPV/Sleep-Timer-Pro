@@ -124,6 +124,24 @@ function createWindow() {
     mainWindow.show();
     autoUpdater.checkForUpdatesAndNotify();
   });
+  // Restaurer l'état des timers actifs quand le renderer est rechargé
+  mainWindow.webContents.on('did-finish-load', () => {
+    const activeTimersList = Object.values(timers).map(t => ({
+      id:          t.id,
+      seconds:     t.remaining,
+      total:       t.total,
+      actionName:  t.actionName,
+      actionIcon:  t.actionIcon,
+      type:        t.type,
+      color:       t.color,
+      paused:      t.paused,
+      waitingMusic:t.waitingMusic || false,
+      startedAt:   t.startedAt || null,
+    }));
+    if (activeTimersList.length > 0) {
+      mainWindow.webContents.send('restore-timers', activeTimersList);
+    }
+  });
   mainWindow.on('close', e => {
     if (settings.minimizeToTray && Object.keys(timers).length > 0) {
       e.preventDefault();
@@ -133,6 +151,7 @@ function createWindow() {
 }
 
 function createTray() {
+  if (tray && !tray.isDestroyed()) return; // éviter les doublons
   try {
     const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.ico')).resize({ width: 16, height: 16 });
     tray = new Tray(icon);
@@ -262,7 +281,9 @@ function startTimer(id, seconds, actionData) {
   timers[id] = {
     id, remaining: seconds, total: seconds,
     actionName: actionData.actionName, actionIcon: actionData.actionIcon, type: actionData.type,
+    color: actionData.color || '#5B8DEF',
     paused: false, waitingMusic: false,
+    startedAt: Date.now(),
     notifSentSet: new Set(thresholds.filter(t => t >= seconds)),
     interval: null
   };

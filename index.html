@@ -677,6 +677,25 @@ ipcRenderer.on('actions-data', (e, d) => { actions = d; renderActions(); renderM
 ipcRenderer.on('history-data',  (e, d) => { history = d; renderHist(); });
 ipcRenderer.on('settings-data', (e, d) => { settings = { ...settings, ...d }; applySettings(); });
 
+ipcRenderer.on('restore-timers', (e, list) => {
+  list.forEach(d => {
+    activeTimers[d.id] = {
+      id:           d.id,
+      remaining:    d.seconds,
+      total:        d.total,
+      name:         d.actionName,
+      icon:         d.actionIcon || 'clock',
+      type:         d.type,
+      color:        d.color || COLORS[0],
+      paused:       d.paused,
+      waitingMusic: d.waitingMusic || false,
+      startedAt:    d.startedAt || null,
+    };
+  });
+  renderTimerCards(); updateSidebar(); updateStatus();
+  if (list.length > 0) showPage('p-timers');
+});
+
 ipcRenderer.on('timer-started', (e, d) => {
   activeTimers[d.id] = { id: d.id, remaining: d.seconds, total: d.seconds, name: d.actionName, icon: d.actionIcon || 'clock', type: d.type, color: d.color || COLORS[0], paused: false, startedAt: Date.now() };
   renderTimerCards(); updateSidebar(); updateStatus();
