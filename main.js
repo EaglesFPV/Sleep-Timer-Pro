@@ -436,6 +436,30 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
 });
 
+ipcMain.on('send-contact', async (e, { name, email, message }) => {
+  try {
+    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  'service_xyj3ngm',
+        template_id: 'template_dfohpm8',
+        user_id:     '4Q0Bp9F4uPxecu8vf',
+        template_params: {
+          from_name:  name,
+          from_email: email,
+          reply_to:   email,
+          message:    message,
+        }
+      })
+    });
+    if (res.ok) e.reply('contact-result', { ok: true });
+    else        e.reply('contact-result', { ok: false, err: await res.text() });
+  } catch (err) {
+    e.reply('contact-result', { ok: false, err: err.message });
+  }
+});
+
 ipcMain.on('get-auto-launch', e => {
   const enabled = app.getLoginItemSettings().openAtLogin;
   e.reply('auto-launch-status', enabled);

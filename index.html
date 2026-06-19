@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>SleepTimer Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init('4Q0Bp9F4uPxecu8vf');</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{--bg-deep:#04080F;--bg-main:#080C18;--bg-card:#0C1120;--bg-card2:#101628;--bg-hover:#161E32;--border:rgba(90,120,210,0.1);--border-hi:rgba(100,149,237,0.35);--text-1:#EDF0FF;--text-2:#6E84B0;--text-3:#2E3D5A;--accent:#5B8DEF;--accent2:#9B7FE8;--danger:#EF5B6E;--warn:#F0A050;--ok:#3EC9A7;--r:12px;--r-sm:8px;}
@@ -1405,31 +1403,29 @@ function sendContactForm() {
   const email   = document.getElementById('contact-email').value.trim();
   const message = document.getElementById('contact-message').value.trim();
   const btn     = document.getElementById('contact-btn');
+  const svgSend = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
 
-  if (!name)    { showContactStatus('warn', 'Veuillez entrer votre nom.'); return; }
+  if (!name)                        { showContactStatus('warn', 'Veuillez entrer votre nom.'); return; }
   if (!email || !email.includes('@')) { showContactStatus('warn', 'Veuillez entrer un email valide.'); return; }
-  if (!message) { showContactStatus('warn', 'Veuillez écrire un message.'); return; }
+  if (!message)                     { showContactStatus('warn', 'Veuillez écrire un message.'); return; }
 
   btn.disabled    = true;
   btn.textContent = 'Envoi en cours…';
 
-  emailjs.send('service_xyj3ngm', 'template_dfohpm8', {
-    from_name:  name,
-    from_email: email,
-    reply_to:   email,
-    message:    message,
-  }).then(() => {
-    showContactStatus('ok', 'Message envoyé ! Merci pour votre retour.');
-    document.getElementById('contact-name').value    = '';
-    document.getElementById('contact-email').value   = '';
-    document.getElementById('contact-message').value = '';
-    btn.disabled    = false;
-    btn.innerHTML   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer';
-  }).catch(() => {
-    showContactStatus('warn', "Erreur lors de l'envoi. Réessayez plus tard.");
-    btn.disabled    = false;
-    btn.innerHTML   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer';
+  ipcRenderer.once('contact-result', (e, res) => {
+    if (res.ok) {
+      showContactStatus('ok', 'Message envoyé ! Merci pour votre retour.');
+      document.getElementById('contact-name').value    = '';
+      document.getElementById('contact-email').value   = '';
+      document.getElementById('contact-message').value = '';
+    } else {
+      showContactStatus('warn', "Erreur lors de l'envoi. Réessayez plus tard.");
+    }
+    btn.disabled  = false;
+    btn.innerHTML = svgSend + ' Envoyer';
   });
+
+  ipc('send-contact', { name, email, message });
 }
 
 function showContactStatus(type, msg) {
