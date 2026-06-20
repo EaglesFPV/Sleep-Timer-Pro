@@ -5,6 +5,15 @@ const { spawn, execSync } = require('child_process');
 const fs   = require('fs');
 const https = require('https');
 
+const LOG_FILE = path.join(app.getPath('userData'), 'logs', 'main.log');
+function log(msg) {
+  try {
+    const dir = path.dirname(LOG_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`);
+  } catch {}
+}
+
 let mainWindow;
 let tray;
 let timers = {};
@@ -453,11 +462,15 @@ ipcMain.on('send-contact', (e, { name, email, message }) => {
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {
+      log(`send-contact HTTP ${res.statusCode}: ${data}`);
       if (res.statusCode === 200) e.reply('contact-result', { ok: true });
       else e.reply('contact-result', { ok: false, err: data });
     });
   });
-  req.on('error', err => e.reply('contact-result', { ok: false, err: err.message }));
+  req.on('error', err => {
+    log(`send-contact ERROR: ${err.message}`);
+    e.reply('contact-result', { ok: false, err: err.message });
+  });
   req.write(body);
   req.end();
 });
