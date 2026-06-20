@@ -2,7 +2,8 @@ const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, dialog, Notificati
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
-const fs = require('fs');
+const fs   = require('fs');
+const https = require('https');
 
 let mainWindow;
 let tray;
@@ -436,28 +437,29 @@ ipcMain.on('add-time', (e, { id, seconds }) => {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('timer-tick', { id, remaining: timers[id].remaining, total: timers[id].total });
 });
 
-ipcMain.on('send-contact', async (e, { name, email, message }) => {
-  try {
-    const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id:  'service_xyj3ngm',
-        template_id: 'template_dfohpm8',
-        user_id:     '4Q0Bp9F4uPxecu8vf',
-        template_params: {
-          name:    name,
-          email:   email,
-          message: message,
-          title:   'SleepTimer Pro',
-        }
-      })
+ipcMain.on('send-contact', (e, { name, email, message }) => {
+  const body = JSON.stringify({
+    service_id:  'service_xyj3ngm',
+    template_id: 'template_dfohpm8',
+    user_id:     '4Q0Bp9F4uPxecu8vf',
+    template_params: { name, email, message, title: 'SleepTimer Pro' }
+  });
+  const req = https.request({
+    hostname: 'api.emailjs.com',
+    path:     '/api/v1.0/email/send',
+    method:   'POST',
+    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+  }, res => {
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => {
+      if (res.statusCode === 200) e.reply('contact-result', { ok: true });
+      else e.reply('contact-result', { ok: false, err: data });
     });
-    if (res.ok) e.reply('contact-result', { ok: true });
-    else        e.reply('contact-result', { ok: false, err: await res.text() });
-  } catch (err) {
-    e.reply('contact-result', { ok: false, err: err.message });
-  }
+  });
+  req.on('error', err => e.reply('contact-result', { ok: false, err: err.message }));
+  req.write(body);
+  req.end();
 });
 
 ipcMain.on('get-auto-launch', e => {
