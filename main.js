@@ -451,13 +451,14 @@ ipcMain.on('send-contact', (e, { name, email, message }) => {
     service_id:  'service_xyj3ngm',
     template_id: 'template_dfohpm8',
     user_id:     '4Q0Bp9F4uPxecu8vf',
+    accessToken: 'dZuO8XftuVqLiGDdg_dXy',
     template_params: { name, email, message, title: 'SleepTimer Pro' }
   });
   const req = https.request({
     hostname: 'api.emailjs.com',
     path:     '/api/v1.0/email/send',
     method:   'POST',
-    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body), 'origin': 'https://dashboard.emailjs.com' }
   }, res => {
     let data = '';
     res.on('data', chunk => data += chunk);
