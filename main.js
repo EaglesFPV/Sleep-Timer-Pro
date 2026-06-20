@@ -446,10 +446,10 @@ ipcMain.on('send-contact', async (e, { name, email, message }) => {
         template_id: 'template_dfohpm8',
         user_id:     '4Q0Bp9F4uPxecu8vf',
         template_params: {
-          from_name:  name,
-          from_email: email,
-          reply_to:   email,
-          message:    message,
+          name:    name,
+          email:   email,
+          message: message,
+          title:   'SleepTimer Pro',
         }
       })
     });
