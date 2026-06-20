@@ -504,18 +504,6 @@ ipcMain.on('execute-now', (e, type) => {
 app.setAppUserModelId('SleepTimer Pro');
 
 app.whenReady().then(() => {
-  // Autoriser les requêtes réseau vers EmailJS (nécessaire dans Electron)
-  const { session } = require('electron');
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.emailjs.com https://cdn.jsdelivr.net"
-        ]
-      }
-    });
-  });
   loadData();
   createWindow();
   createTray();
